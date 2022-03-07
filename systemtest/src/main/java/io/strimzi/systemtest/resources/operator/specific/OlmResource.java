@@ -17,6 +17,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.ByteArrayInputStream;
@@ -277,7 +278,7 @@ public class OlmResource implements SpecificResourceType {
         ResourceManager.cmdKubeClient().exec("delete", "subscriptions", "-l", "app=strimzi", "-n", namespace);
         ResourceManager.cmdKubeClient().exec("delete", "operatorgroups", "-l", "app=strimzi", "-n", namespace);
         ResourceManager.cmdKubeClient().exec(false, "delete", "csv", csvName, "-n", namespace);
-        DeploymentUtils.waitForDeploymentDeletion(deploymentName);
+        DeploymentUtils.waitForDeploymentDeletion(namespace, deploymentName);
     }
 
     private static void waitFor(String deploymentName, String namespace, int replicas) {
@@ -287,7 +288,7 @@ public class OlmResource implements SpecificResourceType {
     }
 
     private static Map<String, JsonObject> parseExamplesFromCsv(String csvName, String namespace) {
-        String csvString = ResourceManager.cmdKubeClient().exec(true, false, "get", "csv", csvName, "-o", "json", "-n", namespace).out();
+        String csvString = ResourceManager.cmdKubeClient().exec(true, Level.DEBUG, "get", "csv", csvName, "-o", "json", "-n", namespace).out();
         JsonObject csv = new JsonObject(csvString);
         String almExamples = csv.getJsonObject("metadata").getJsonObject("annotations").getString("alm-examples");
         JsonArray examples = new JsonArray(almExamples);

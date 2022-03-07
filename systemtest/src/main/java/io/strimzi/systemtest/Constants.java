@@ -108,7 +108,7 @@ public interface Constants {
     String STATEFUL_SET = "StatefulSet";
     String POD = "Pod";
     String NETWORK_POLICY = "NetworkPolicy";
-    String JOB = "job";
+    String JOB = "Job";
     String VALIDATION_WEBHOOK_CONFIG = "ValidatingWebhookConfiguration";
 
     /**
@@ -147,6 +147,11 @@ public interface Constants {
     String PATH_TO_KAFKA_MIRROR_MAKER_CONFIG = Constants.PATH_TO_PACKAGING_EXAMPLES + "/mirror-maker/kafka-mirror-maker.yaml";
     String PATH_TO_KAFKA_MIRROR_MAKER_2_CONFIG = Constants.PATH_TO_PACKAGING_EXAMPLES + "/mirror-maker/kafka-mirror-maker-2.yaml";
     String PATH_TO_KAFKA_MIRROR_MAKER_2_METRICS_CONFIG = Constants.PATH_TO_PACKAGING_EXAMPLES + "/metrics/kafka-mirror-maker-2-metrics.yaml";
+
+    /**
+     * Feature gate related constants
+     */
+    String USE_STRIMZI_POD_SET = "+UseStrimziPodSets";
 
     /**
      * Default value which allows execution of tests with any tags
@@ -298,6 +303,8 @@ public interface Constants {
      */
     String OLM = "olm";
 
+    String ISOLATED_TEST = "isolatedtest";
+    String PARALLEL_TEST = "paralleltest";
     /**
      * Tag for tests which executing in parallel namespaces
      */
@@ -312,6 +319,9 @@ public interface Constants {
      */
     String ISOLATED = "Isolated";
     String ST = "ST";
+
+    String TEST_CASE_NAME_LABEL = "test.case";
+    String TEST_SUITE_NAME_LABEL = "test.suite";
 
     /**
      * Cruise Control related parameters
@@ -344,7 +354,6 @@ public interface Constants {
      */
     String NAMESPACE_KEY = "NAMESPACE_NAME";
     String PREPARE_OPERATOR_ENV_KEY = "PREPARE_OPERATOR_ENV";
-    String PARALLEL_CLASS_COUNT = "PARALLEL_CLASS_COUNT";
 
     /**
      * Auxiliary variable for cluster operator deployment
@@ -357,6 +366,7 @@ public interface Constants {
     String KAFKA_CLIENTS_KEY = "KAFKA_CLIENTS_NAME";
     String PRODUCER_KEY = "PRODUCER_NAME";
     String CONSUMER_KEY = "CONSUMER_NAME";
+    String USER_NAME_KEY = "USER_NAME";
     String KAFKA_CLIENTS_POD_KEY = "KAFKA_CLIENTS_POD_NAME";
     String KAFKA_TRACING_CLIENT_KEY = "KAFKA_TRACING_CLIENT";
     String KAFKA_SELECTOR = "KAFKA_SELECTOR";

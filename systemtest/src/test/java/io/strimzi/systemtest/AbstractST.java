@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static io.strimzi.operator.common.Util.sha1Prefix;
 import static io.strimzi.systemtest.matchers.Matchers.logHasNoUnexpectedErrors;
 import static io.strimzi.test.k8s.KubeClusterResource.cmdKubeClient;
 import static io.strimzi.test.k8s.KubeClusterResource.kubeClient;
@@ -84,10 +85,6 @@ public abstract class AbstractST implements TestSeparator {
     protected KubeClusterResource cluster;
     private static final Logger LOGGER = LogManager.getLogger(AbstractST.class);
 
-    // {thread-safe} this lock ensures that no race-condition happen in @BeforeAll part
-    private static final Object BEFORE_ALL_LOCK = new Object();
-    // {thread-safe} this lock ensures that no race-condition happen in @AfterALl part in deletion of namespaces
-    private static final Object AFTER_ALL_LOCK = new Object();
     // {thread-safe} this needs to be static because when more threads spawns diff. TestSuites it might produce race conditions
     private static final Object LOCK = new Object();
 
@@ -528,6 +525,14 @@ public abstract class AbstractST implements TestSeparator {
         LOGGER.info("Docker images verified");
     }
 
+    private final void afterEachMustExecute(ExtensionContext extensionContext) {
+        if (StUtils.isParallelTest(extensionContext) ||
+            StUtils.isParallelNamespaceTest(extensionContext)) {
+            parallelSuiteController.notifyParallelTestToAllowExecution(extensionContext);
+            parallelSuiteController.removeParallelTest(extensionContext);
+        }
+    }
+
     protected void afterEachMayOverride(ExtensionContext extensionContext) throws Exception {
         if (!Environment.SKIP_TEARDOWN) {
             ResourceManager.getInstance().deleteResources(extensionContext);
@@ -539,6 +544,7 @@ public abstract class AbstractST implements TestSeparator {
         clusterOperator = SetupClusterOperator.getInstanceHolder();
 
         if (StUtils.isParallelSuite(extensionContext)) {
+            parallelSuiteController.notifyParallelSuiteToAllowExecution(extensionContext);
             parallelSuiteController.removeParallelSuite(extensionContext);
         }
 
@@ -589,18 +595,27 @@ public abstract class AbstractST implements TestSeparator {
             }
 
             LOGGER.info("Not first test we are gonna generate cluster name");
-            String clusterName = CLUSTER_NAME_PREFIX + new Random().nextInt(Integer.MAX_VALUE);
+
+            String clusterName = CLUSTER_NAME_PREFIX + sha1Prefix(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
 
             mapWithClusterNames.put(testName, clusterName);
             mapWithTestTopics.put(testName, KafkaTopicUtils.generateRandomNameOfTopic());
             mapWithTestUsers.put(testName, KafkaUserUtils.generateRandomNameOfKafkaUser());
             mapWithKafkaClientNames.put(testName, clusterName + "-" + Constants.KAFKA_CLIENTS);
 
-            LOGGER.debug("CLUSTER_NAMES_MAP: \n{}", mapWithClusterNames);
-            LOGGER.debug("USERS_NAME_MAP: \n{}", mapWithTestUsers);
-            LOGGER.debug("TOPIC_NAMES_MAP: \n{}", mapWithTestTopics);
-            LOGGER.debug("============THIS IS CLIENTS MAP:\n{}", mapWithKafkaClientNames);
+            LOGGER.trace("CLUSTER_NAMES_MAP: {}", mapWithClusterNames);
+            LOGGER.trace("USERS_NAME_MAP: {}", mapWithTestUsers);
+            LOGGER.trace("TOPIC_NAMES_MAP: {}", mapWithTestTopics);
+            LOGGER.trace("THIS IS CLIENTS MAP: {}", mapWithKafkaClientNames);
             testSuiteNamespaceManager.createParallelNamespace(extensionContext);
+        }
+    }
+
+    private final void beforeEachMustExecute(ExtensionContext extensionContext) {
+        if (StUtils.isParallelNamespaceTest(extensionContext) ||
+            StUtils.isParallelTest(extensionContext)) {
+            parallelSuiteController.addParallelTest(extensionContext);
+            parallelSuiteController.waitUntilAllowedNumberTestCasesParallel(extensionContext);
         }
     }
 
@@ -608,15 +623,13 @@ public abstract class AbstractST implements TestSeparator {
         try {
             clusterOperator = SetupClusterOperator.getInstanceHolder();
         } finally {
-            // ensures that only one thread will modify @ParallelSuiteController and race-condition could not happen
-            synchronized (BEFORE_ALL_LOCK) {
-                // (optional) create additional namespace/namespaces for test suites if needed
-                testSuiteNamespaceManager.createAdditionalNamespaces(extensionContext);
-
-                if (StUtils.isParallelSuite(extensionContext)) {
-                    parallelSuiteController.addParallelSuite(extensionContext);
-                }
+            if (StUtils.isParallelSuite(extensionContext)) {
+                parallelSuiteController.addParallelSuite(extensionContext);
+                parallelSuiteController.waitUntilAllowedNumberTestSuitesInParallel(extensionContext);
             }
+            // (optional) create additional namespace/namespaces for test suites if needed
+            testSuiteNamespaceManager.createAdditionalNamespaces(extensionContext);
+
             if (StUtils.isIsolatedSuite(extensionContext)) {
                 cluster.setNamespace(Constants.INFRA_NAMESPACE);
                 // wait for parallel suites are done
@@ -643,14 +656,15 @@ public abstract class AbstractST implements TestSeparator {
     @BeforeEach
     void setUpTestCase(ExtensionContext extensionContext) {
         LOGGER.debug(String.join("", Collections.nCopies(76, "=")));
-        LOGGER.debug("{} - [BEFORE EACH] has been called", this.getClass().getName());
+        LOGGER.debug("[{} - Before Each] - Setup test case environment", StUtils.removePackageName(this.getClass().getName()));
+        beforeEachMustExecute(extensionContext);
         beforeEachMayOverride(extensionContext);
     }
 
     @BeforeAll
     void setUpTestSuite(ExtensionContext extensionContext) {
         LOGGER.debug(String.join("", Collections.nCopies(76, "=")));
-        LOGGER.debug("{} - [BEFORE ALL] has been called", this.getClass().getName());
+        LOGGER.debug("[{} - Before All] - Setup test suite environment", StUtils.removePackageName(this.getClass().getName()));
         beforeAllMayOverride(extensionContext);
         beforeAllMustExecute(extensionContext);
     }
@@ -658,14 +672,15 @@ public abstract class AbstractST implements TestSeparator {
     @AfterEach
     void tearDownTestCase(ExtensionContext extensionContext) throws Exception {
         LOGGER.debug(String.join("", Collections.nCopies(76, "=")));
-        LOGGER.debug("{} - [AFTER EACH] has been called", this.getClass().getName());
+        LOGGER.debug("[{} - After Each] - Clean up after test", StUtils.removePackageName(this.getClass().getName()));
         afterEachMayOverride(extensionContext);
+        afterEachMustExecute(extensionContext);
     }
 
     @AfterAll
     void tearDownTestSuite(ExtensionContext extensionContext) throws Exception {
         LOGGER.debug(String.join("", Collections.nCopies(76, "=")));
-        LOGGER.debug("{} - [AFTER ALL] has been called", this.getClass().getName());
+        LOGGER.debug("[{} - After All] - Clean up after test suite", StUtils.removePackageName(this.getClass().getName()));
         afterAllMayOverride(extensionContext);
         afterAllMustExecute(extensionContext);
     }

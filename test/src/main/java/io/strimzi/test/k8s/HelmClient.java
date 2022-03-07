@@ -8,6 +8,7 @@ import io.strimzi.test.executor.Exec;
 import io.strimzi.test.k8s.cmdClient.KubeCmdClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,14 +43,14 @@ public class HelmClient {
     public HelmClient install(Path chart, String releaseName, Map<String, Object> valuesMap) {
         LOGGER.info("Installing helm-chart {}", releaseName);
         String values = Stream.of(valuesMap).flatMap(m -> m.entrySet().stream())
-                .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining(","));
+            .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
+            .collect(Collectors.joining(","));
         Exec.exec(null, wait(namespace(command("install",
-                releaseName,
-                "--set", values,
-                "--timeout", INSTALL_TIMEOUT_SECONDS,
-                "--debug",
-                chart.toString()))), 0, true, true);
+            releaseName,
+            "--set", values,
+            "--timeout", INSTALL_TIMEOUT_SECONDS,
+            "--debug",
+            chart.toString()))), 0, Level.INFO, true);
         return this;
     }
 
@@ -68,7 +69,7 @@ public class HelmClient {
      */
     public HelmClient delete(String namespace, String releaseName) {
         LOGGER.info("Deleting helm-chart:{} in namespace:{}", releaseName, namespace);
-        Exec.exec(null, command("delete", releaseName, "--namespace", namespace), 0, false, false);
+        Exec.exec(null, command("delete", releaseName, "--namespace", namespace), 0, Level.DEBUG, false);
         return this;
     }
 

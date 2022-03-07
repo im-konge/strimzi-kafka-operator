@@ -10,8 +10,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodCondition;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.admissionregistration.v1.ValidatingWebhookConfiguration;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRole;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
 import io.fabric8.kubernetes.client.CustomResource;
@@ -67,6 +70,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,10 +149,10 @@ public class ResourceManager {
     }
 
     @SafeVarargs
-    public final <T extends HasMetadata> void createResource(ExtensionContext testContext, boolean waitReady, T... resources) {
+        public final <T extends HasMetadata> void createResource(ExtensionContext testContext, boolean waitReady, T... resources) {
         for (T resource : resources) {
             ResourceType<T> type = findResourceType(resource);
-            LOGGER.info("Create/Update of {} {} in namespace {}",
+            LOGGER.info("Create/Update {} {} in namespace {}",
                 resource.getKind(), resource.getMetadata().getName(), resource.getMetadata().getNamespace() == null ? "(not set)" : resource.getMetadata().getNamespace());
 
             // ignore test context of shared Cluster Operator
@@ -157,12 +161,53 @@ public class ResourceManager {
                 if (StUtils.isParallelNamespaceTest(testContext)) {
                     if (!Environment.isNamespaceRbacScope()) {
                         final String namespace = testContext.getStore(ExtensionContext.Namespace.GLOBAL).get(Constants.NAMESPACE_KEY).toString();
-                        LOGGER.info("Using namespace: {}", namespace);
+                        LOGGER.info("Using Namespace: {}", namespace);
                         resource.getMetadata().setNamespace(namespace);
                     }
                 }
             }
 
+            // If we are create resource in test case we annotate it with label. This is needed for filtering when
+            // we collect logs from Pods, ReplicaSets, Deployments etc.
+            Map<String, String> labels = null;
+            if (testContext.getTestMethod().isPresent()) {
+                String testCaseName = testContext.getRequiredTestMethod().getName();
+                // because label values `must be no more than 63 characters`
+                if (testCaseName.length() > 63) {
+                    // we cut to 62 characters
+                    testCaseName = testCaseName.substring(0, 62);
+                }
+
+                if (resource.getMetadata().getLabels() == null) {
+                    labels = new HashMap<>();
+                    labels.put(Constants.TEST_CASE_NAME_LABEL, testCaseName);
+                } else {
+                    labels = new HashMap<>(resource.getMetadata().getLabels());
+                    labels.put(Constants.TEST_CASE_NAME_LABEL, testCaseName);
+                }
+                resource.getMetadata().setLabels(labels);
+            } else {
+                // this is labeling for shared resources in @BeforeAll
+                if (testContext.getTestClass().isPresent()) {
+                    final String testSuiteName = StUtils.removePackageName(testContext.getRequiredTestClass().getName());
+
+                    if (resource.getMetadata().getLabels() == null) {
+                        labels = new HashMap<>();
+                        labels.put(Constants.TEST_SUITE_NAME_LABEL, testSuiteName);
+                    } else {
+                        labels = new HashMap<>(resource.getMetadata().getLabels());
+                        labels.put(Constants.TEST_SUITE_NAME_LABEL, testSuiteName);
+                    }
+                    resource.getMetadata().setLabels(labels);
+                }
+            }
+
+            // adding test.suite and test.case labels to the PodTemplate
+            if (resource.getKind().equals(Constants.JOB)) {
+                this.copyTestSuiteAndTestCaseControllerLabelsIntoPodTemplate(resource, ((Job) resource).getSpec().getTemplate());
+            } else if (resource.getKind().equals(Constants.DEPLOYMENT)) {
+                this.copyTestSuiteAndTestCaseControllerLabelsIntoPodTemplate(resource, ((Deployment) resource).getSpec().getTemplate());
+            }
             type.create(resource);
 
             synchronized (this) {
@@ -231,6 +276,35 @@ public class ResourceManager {
     }
 
     /**
+     * Auxiliary method for copying {@link Constants.TEST_SUITE_NAME_LABEL} and {@link Constants.TEST_CASE_NAME_LABEL} labels
+     * into PodTemplate ensuring that in case of failure {@link io.strimzi.systemtest.logs.LogCollector} will collect all
+     * related Pods, which corespondents to such Controller (i.e., Job, Deployment)
+     *
+     * @param resource controller resource from which we copy test suite or test case labels
+     * @param resourcePodTemplate {@link PodTemplateSpec} of the specific resource
+     * @param <T> resource, which sings contract with {@link HasMetadata} interface
+     * @param <R> {@link PodTemplateSpec}
+     */
+    private final <T extends HasMetadata, R extends PodTemplateSpec> void copyTestSuiteAndTestCaseControllerLabelsIntoPodTemplate(final T resource, final R resourcePodTemplate) {
+        if (resource.getMetadata().getLabels() != null && resourcePodTemplate.getMetadata().getLabels() != null) {
+            // 1. fetch Controller and PodTemplate labels
+            final Map<String, String> controllerLabels = new HashMap<>(resource.getMetadata().getLabels());
+            final Map<String, String> podLabels = new HashMap<>(resourcePodTemplate.getMetadata().getLabels());
+
+            // 2. a) add label for test.suite
+            if (controllerLabels.containsKey(Constants.TEST_SUITE_NAME_LABEL)) {
+                podLabels.putIfAbsent(Constants.TEST_SUITE_NAME_LABEL, controllerLabels.get(Constants.TEST_SUITE_NAME_LABEL));
+            }
+            // 2. b) add label for test.case
+            if (controllerLabels.containsKey(Constants.TEST_CASE_NAME_LABEL)) {
+                podLabels.putIfAbsent(Constants.TEST_CASE_NAME_LABEL, controllerLabels.get(Constants.TEST_CASE_NAME_LABEL));
+            }
+            // 3. modify PodTemplates labels for LogCollector using reference and thus not need to return
+            resourcePodTemplate.getMetadata().setLabels(podLabels);
+        }
+    }
+
+    /**
      * Synchronizing all resources which are inside specific extension context.
      * @param testContext context of the test case
      * @param <T> type of the resource which inherits from HasMetadata f.e Kafka, KafkaConnect, Pod, Deployment etc..
@@ -268,12 +342,11 @@ public class ResourceManager {
 
     public void deleteResources(ExtensionContext testContext) throws Exception {
         LOGGER.info(String.join("", Collections.nCopies(76, "#")));
-        LOGGER.info("Going to clear all resources for {}", testContext.getDisplayName());
-        LOGGER.info(String.join("", Collections.nCopies(76, "#")));
         if (!STORED_RESOURCES.containsKey(testContext.getDisplayName()) || STORED_RESOURCES.get(testContext.getDisplayName()).isEmpty()) {
             LOGGER.info("In context {} is everything deleted.", testContext.getDisplayName());
+        } else {
+            LOGGER.info("Delete all resources for {}", testContext.getDisplayName());
         }
-
 
         // if stack is created for specific test suite or test case
         AtomicInteger numberOfResources = STORED_RESOURCES.get(testContext.getDisplayName()) != null ?
@@ -292,8 +365,8 @@ public class ResourceManager {
                 }
             );
         }
-        LOGGER.info(String.join("", Collections.nCopies(76, "#")));
         STORED_RESOURCES.remove(testContext.getDisplayName());
+        LOGGER.info(String.join("", Collections.nCopies(76, "#")));
     }
 
     /**
@@ -310,7 +383,7 @@ public class ResourceManager {
             if (printWholeCR.contains(kind)) {
                 LOGGER.info(customResource);
             } else {
-                List<String> log = new ArrayList<>(asList("\n", kind, " status:\n", "\nConditions:\n"));
+                List<String> log = new ArrayList<>(asList(kind, " status:\n", "\nConditions:\n"));
 
                 if (customResource.getStatus() != null) {
                     List<Condition> conditions = customResource.getStatus().getConditions();
@@ -331,11 +404,14 @@ public class ResourceManager {
                             if (podCondition.getMessage() != null) {
                                 log.add("\n\tType: " + podCondition.getType() + "\n");
                                 log.add("\tMessage: " + podCondition.getMessage() + "\n");
+                            } else {
+                                log.add("\n\tType: <EMPTY>\n");
+                                log.add("\tMessage: <EMPTY>\n");
                             }
                         }
                         log.add("\n\n");
                     }
-                    LOGGER.info("{}", String.join("", log));
+                    LOGGER.info("{}", String.join("", log).strip());
                 }
             }
         }

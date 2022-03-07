@@ -74,15 +74,15 @@ public interface KubeCluster {
                     cluster = kc;
                     break;
                 } else {
-                    logger.warn("Cluster {} is not running!", kc);
+                    logger.debug("Cluster {} is not running!", kc);
                 }
             } else {
-                logger.warn("Cluster {} is not installed!", kc);
+                logger.debug("Cluster {} is not installed!", kc);
             }
         }
         if (cluster == null) {
             throw new NoClusterException(
-                    "Unable to find a cluster; tried " + Arrays.toString(clusters));
+                "Unable to find a cluster; tried " + Arrays.toString(clusters));
         }
         logger.info("Using cluster: {}", cluster);
         return cluster;
