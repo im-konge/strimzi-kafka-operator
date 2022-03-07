@@ -575,7 +575,7 @@ public class AbstractUpgradeST extends AbstractST {
     }
 
     protected String getResourceApiVersion(String resourcePlural, String coVersion) {
-        if (coVersion.equals("HEAD") || TestKafkaVersion.compareDottedVersions(coVersion, "0.22.0") >= 0) {
+        if (coVersion.equals("HEAD") || TestKafkaVersion.compareDottedVersions(coVersion, "1.7.0") >= 0) {
             return resourcePlural + "." + Constants.V1BETA2 + "." + Constants.RESOURCE_GROUP_NAME;
         } else {
             return resourcePlural + "." + Constants.V1BETA1 + "." + Constants.RESOURCE_GROUP_NAME;

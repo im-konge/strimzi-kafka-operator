@@ -1,38 +1,9 @@
 [
   {
-    "fromVersion":"0.22.1",
-    "fromExamples":"strimzi-0.22.1",
-    "urlFrom":"https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.22.1/strimzi-0.22.1.zip",
-    "convertCRDs": true,
-    "conversionTool": {
-      "urlToConversionTool": "https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.22.0/api-conversion-0.22.0.zip",
-      "toConversionTool": "api-conversion-0.22.0"
-    },
-    "generateTopics": true,
-    "additionalTopics": 2,
-    "oldestKafka": "2.6.0",
-    "imagesAfterKafkaUpgrade": {
-      "zookeeper": "strimzi/kafka:latest-kafka-3.1.0",
-      "kafka": "strimzi/kafka:latest-kafka-3.1.0",
-      "topicOperator": "strimzi/operator:latest",
-      "userOperator": "strimzi/operator:latest"
-    },
-    "client": {
-      "continuousClientsMessages": 500
-    },
-    "environmentInfo": {
-      "maxK8sVersion": "1.21",
-      "status": "stable",
-      "flakyEnvVariable": "none",
-      "reason" : "Test is working on environment, where k8s server version is < 1.22"
-    },
-    "strimziFeatureGatesFlagsBefore": "",
-    "strimziFeatureGatesFlagsAfter": "-ControlPlaneListener"
-  },
-  {
-    "fromVersion":"0.28.0",
-    "fromExamples":"strimzi-0.28.0",
-    "urlFrom":"https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.28.0/strimzi-0.28.0.zip",
+    "fromVersion":"2.0.1",
+    "fromExamples":"",
+    "urlFrom":"http://download.lab.bos.redhat.com/devel/candidates/amq/AMQ-STREAMS-2.0.1/amq-streams-2.0.1-ocp-install-examples.zip",
+    "fromStrimziVersion": "0.26.0",
     "convertCRDs": false,
     "conversionTool": {
       "urlToConversionTool": "",
@@ -42,40 +13,10 @@
     "additionalTopics": 2,
     "oldestKafka": "3.0.0",
     "imagesAfterKafkaUpgrade": {
-      "zookeeper": "strimzi/kafka:latest-kafka-3.1.0",
-      "kafka": "strimzi/kafka:latest-kafka-3.1.0",
-      "topicOperator": "strimzi/operator:latest",
-      "userOperator": "strimzi/operator:latest"
-    },
-    "client": {
-      "continuousClientsMessages": 500
-    },
-    "environmentInfo": {
-      "maxK8sVersion": "latest",
-      "status": "stable",
-      "flakyEnvVariable": "none",
-      "reason" : "Test is working on all environment used by QE."
-    },
-    "strimziFeatureGatesFlagsBefore": "-UseStrimziPodSets",
-    "strimziFeatureGatesFlagsAfter": "+UseStrimziPodSets"
-  },
-  {
-    "fromVersion":"0.28.0",
-    "fromExamples":"strimzi-0.28.0",
-    "urlFrom":"https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.28.0/strimzi-0.28.0.zip",
-    "convertCRDs": false,
-    "conversionTool": {
-      "urlToConversionTool": "",
-      "toConversionTool": ""
-    },
-    "generateTopics": true,
-    "additionalTopics": 2,
-    "oldestKafka": "3.0.0",
-    "imagesAfterKafkaUpgrade": {
-      "zookeeper": "strimzi/kafka:latest-kafka-3.1.0",
-      "kafka": "strimzi/kafka:latest-kafka-3.1.0",
-      "topicOperator": "strimzi/operator:latest",
-      "userOperator": "strimzi/operator:latest"
+      "zookeeper": "amq-streams-kafka-31-rhel8:2.1.0",
+      "kafka": "amq-streams-kafka-31-rhel8:2.1.0",
+      "topicOperator": "amq-streams-rhel8-operator:2.1.0",
+      "userOperator": "amq-streams-rhel8-operator:2.1.0"
     },
     "client": {
       "continuousClientsMessages": 500

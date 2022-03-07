@@ -1,19 +1,19 @@
 [
   {
     "fromVersion":"HEAD",
-    "toVersion":"0.28.0",
+    "toVersion":"2.0.1",
     "fromExamples":"HEAD",
-    "toExamples":"strimzi-0.28.0",
+    "toExamples":"",
     "urlFrom":"HEAD",
-    "urlTo":"https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.28.0/strimzi-0.28.0.zip",
+    "urlTo":"http://download.lab.bos.redhat.com/devel/candidates/amq/AMQ-STREAMS-2.0.1/amq-streams-2.0.1-ocp-install-examples.zip",
     "generateTopics": true,
     "additionalTopics": 2,
-    "oldestKafka": "3.0.0",
+    "oldestKafka": "2.8.0",
     "imagesAfterOperatorDowngrade": {
-      "zookeeper": "strimzi/kafka:0.28.0-kafka-3.1.0",
-      "kafka": "strimzi/kafka:0.28.0-kafka-3.1.0",
-      "topicOperator": "strimzi/operator:0.28.0",
-      "userOperator": "strimzi/operator:0.28.0"
+      "zookeeper": "amq-streams-kafka-30-rhel8:2.0.0",
+      "kafka": "amq-streams-kafka-30-rhel8:2.0.0",
+      "topicOperator": "amq-streams-rhel8-operator:2.0.0",
+      "userOperator": "amq-streams-rhel8-operator:2.0.0"
     },
     "deployKafkaVersion": "3.1.0",
     "client": {

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.strimzi.api.kafka.model.KafkaResources;
+import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.resources.operator.SetupClusterOperator;
 import io.strimzi.systemtest.resources.ResourceManager;
 import io.strimzi.systemtest.utils.FileUtils;
@@ -230,7 +231,7 @@ public class StrimziUpgradeIsolatedST extends AbstractUpgradeST {
         JsonObject startingVersion = null;
 
         for (Object item : upgradeJson) {
-            TestKafkaVersion defaultVersion = getDefaultKafkaVersionPerStrimzi(((JsonObject) item).getValue("fromVersion").toString());
+            TestKafkaVersion defaultVersion = getDefaultKafkaVersionPerStrimzi(((JsonObject) item).getValue("fromStrimziVersion").toString());
 
             ((JsonObject) item).put("defaultKafka", defaultVersion.version());
 
@@ -268,7 +269,7 @@ public class StrimziUpgradeIsolatedST extends AbstractUpgradeST {
         logPodImages(clusterName);
         changeClusterOperator(testParameters, INFRA_NAMESPACE, extensionContext);
 
-        if (TestKafkaVersion.supportedVersionsContainsVersion(getDefaultKafkaVersionPerStrimzi(testParameters.getString("fromVersion")).version())) {
+        if (TestKafkaVersion.supportedVersionsContainsVersion(getDefaultKafkaVersionPerStrimzi(testParameters.getString("fromStrimziVersion")).version())) {
             waitForKafkaClusterRollingUpdate();
         }
 
@@ -295,6 +296,9 @@ public class StrimziUpgradeIsolatedST extends AbstractUpgradeST {
     @BeforeEach
     void setupEnvironment() {
         cluster.createNamespace(INFRA_NAMESPACE);
+        if (Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET != null && !Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET.isEmpty()) {
+            StUtils.copyImagePullSecret(INFRA_NAMESPACE);
+        }
     }
 
     @AfterEach
