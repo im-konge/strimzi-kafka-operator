@@ -56,6 +56,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -1379,5 +1380,11 @@ class ConnectIsolatedST extends AbstractST {
 
         final String kafkaConnectPodNameAfterRU = kubeClient(namespaceName).listPodsByPrefixInName(KafkaConnectResources.deploymentName(clusterName)).get(0).getMetadata().getName();
         KafkaConnectUtils.waitUntilKafkaConnectRestApiIsAvailable(namespaceName, kafkaConnectPodNameAfterRU);
+    }
+
+    @BeforeAll
+    void setUp() {
+        clusterOperator.unInstall();
+        clusterOperator = clusterOperator.defaultInstallation().createInstallation().runInstallation();
     }
 }
