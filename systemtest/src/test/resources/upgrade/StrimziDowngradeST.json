@@ -26,6 +26,35 @@
       "reason" : "Test is working on all environment used by QE."
     },
     "strimziFeatureGatesFlagsBefore": "+UseStrimziPodSets",
-    "strimziFeatureGatesFlagsAfter": "-UseStrimziPodSets"
+    "strimziFeatureGatesFlagsAfter": ""
+  },
+  {
+    "fromVersion":"HEAD",
+    "toVersion":"2.0.1",
+    "fromExamples":"HEAD",
+    "toExamples":"",
+    "urlFrom":"HEAD",
+    "urlTo":"http://download.lab.bos.redhat.com/devel/candidates/amq/AMQ-STREAMS-2.0.1/amq-streams-2.0.1-ocp-install-examples.zip",
+    "generateTopics": true,
+    "additionalTopics": 2,
+    "oldestKafka": "2.8.0",
+    "imagesAfterOperatorDowngrade": {
+      "zookeeper": "amq-streams-kafka-30-rhel8:2.0.0",
+      "kafka": "amq-streams-kafka-30-rhel8:2.0.0",
+      "topicOperator": "amq-streams-rhel8-operator:2.0.0",
+      "userOperator": "amq-streams-rhel8-operator:2.0.0"
+    },
+    "deployKafkaVersion": "3.1.0",
+    "client": {
+      "continuousClientsMessages": 500
+    },
+    "environmentInfo": {
+      "maxK8sVersion": "latest",
+      "status": "stable",
+      "flakyEnvVariable": "none",
+      "reason" : "Test is working on all environment used by QE."
+    },
+    "strimziFeatureGatesFlagsBefore": "",
+    "strimziFeatureGatesFlagsAfter": ""
   }
 ]

@@ -27,7 +27,38 @@
       "flakyEnvVariable": "none",
       "reason" : "Test is working on all environment used by QE."
     },
-    "strimziFeatureGatesFlagsBefore": "-UseStrimziPodSets",
+    "strimziFeatureGatesFlagsBefore": "",
     "strimziFeatureGatesFlagsAfter": "+UseStrimziPodSets"
+  },
+  {
+    "fromVersion":"2.0.1",
+    "fromExamples":"",
+    "urlFrom":"http://download.lab.bos.redhat.com/devel/candidates/amq/AMQ-STREAMS-2.0.1/amq-streams-2.0.1-ocp-install-examples.zip",
+    "fromStrimziVersion": "0.26.0",
+    "convertCRDs": false,
+    "conversionTool": {
+      "urlToConversionTool": "http://download.lab.bos.redhat.com/devel/candidates/amq/AMQ-STREAMS-1.7.0/amq-streams-1.7.0-api-conversion-tool.zip",
+      "toConversionTool": "api-conversion-0.22.1.redhat-00004"
+    },
+    "generateTopics": true,
+    "additionalTopics": 2,
+    "oldestKafka": "3.0.0",
+    "imagesAfterKafkaUpgrade": {
+      "zookeeper": "amq-streams-kafka-31-rhel8:2.1.0",
+      "kafka": "amq-streams-kafka-31-rhel8:2.1.0",
+      "topicOperator": "amq-streams-rhel8-operator:2.1.0",
+      "userOperator": "amq-streams-rhel8-operator:2.1.0"
+    },
+    "client": {
+      "continuousClientsMessages": 500
+    },
+    "environmentInfo": {
+      "maxK8sVersion": "latest",
+      "status": "stable",
+      "flakyEnvVariable": "none",
+      "reason" : "Test is working on all environment used by QE."
+    },
+    "strimziFeatureGatesFlagsBefore": "",
+    "strimziFeatureGatesFlagsAfter": ""
   }
 ]
