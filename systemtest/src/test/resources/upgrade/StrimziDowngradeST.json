@@ -10,12 +10,12 @@
     "additionalTopics": 2,
     "oldestKafka": "2.8.0",
     "imagesAfterOperatorDowngrade": {
-      "zookeeper": "amq-streams-kafka-30-rhel8:2.0.0",
-      "kafka": "amq-streams-kafka-30-rhel8:2.0.0",
-      "topicOperator": "amq-streams-rhel8-operator:2.0.0",
-      "userOperator": "amq-streams-rhel8-operator:2.0.0"
+      "zookeeper": "amq-streams-kafka-30-rhel8:2.0.1",
+      "kafka": "amq-streams-kafka-30-rhel8:2.0.1",
+      "topicOperator": "amq-streams-rhel8-operator:2.0.1",
+      "userOperator": "amq-streams-rhel8-operator:2.0.1"
     },
-    "deployKafkaVersion": "3.1.0",
+    "deployKafkaVersion": "3.0.0",
     "client": {
       "continuousClientsMessages": 500
     },
@@ -39,12 +39,12 @@
     "additionalTopics": 2,
     "oldestKafka": "2.8.0",
     "imagesAfterOperatorDowngrade": {
-      "zookeeper": "amq-streams-kafka-30-rhel8:2.0.0",
-      "kafka": "amq-streams-kafka-30-rhel8:2.0.0",
-      "topicOperator": "amq-streams-rhel8-operator:2.0.0",
-      "userOperator": "amq-streams-rhel8-operator:2.0.0"
+      "zookeeper": "amq-streams-kafka-30-rhel8:2.0.1",
+      "kafka": "amq-streams-kafka-30-rhel8:2.0.1",
+      "topicOperator": "amq-streams-rhel8-operator:2.0.1",
+      "userOperator": "amq-streams-rhel8-operator:2.0.1"
     },
-    "deployKafkaVersion": "3.1.0",
+    "deployKafkaVersion": "3.0.0",
     "client": {
       "continuousClientsMessages": 500
     },
