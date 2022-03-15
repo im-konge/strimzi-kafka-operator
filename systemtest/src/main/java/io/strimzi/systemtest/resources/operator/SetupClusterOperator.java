@@ -19,6 +19,7 @@ import io.strimzi.systemtest.BeforeAllOnce;
 import io.strimzi.systemtest.Constants;
 import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.enums.ClusterOperatorRBACType;
+import io.strimzi.systemtest.enums.OlmInstallationStrategy;
 import io.strimzi.systemtest.resources.ResourceManager;
 import io.strimzi.systemtest.resources.kubernetes.ClusterRoleBindingResource;
 import io.strimzi.systemtest.resources.kubernetes.NetworkPolicyResource;
@@ -227,6 +228,18 @@ public class SetupClusterOperator {
     public SetupClusterOperator runOlmInstallation() {
         LOGGER.info("Cluster operator installation configuration:\n{}", this::toString);
         olmInstallation();
+        return this;
+    }
+
+    public SetupClusterOperator runManualOlmInstallation(final String fromVersion, final String channelName) {
+        if (isClusterOperatorNamespaceNotCreated()) {
+            cluster.setNamespace(namespaceInstallTo);
+            cluster.createNamespaces(CollectorElement.createCollectorElement(testClassName, testMethodName), namespaceInstallTo, bindingsNamespaces);
+            extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).put(Constants.PREPARE_OPERATOR_ENV_KEY + namespaceInstallTo, false);
+        }
+        olmResource = new OlmResource(this.namespaceInstallTo);
+        olmResource.create(this.namespaceInstallTo, OlmInstallationStrategy.Manual, fromVersion, channelName);
+
         return this;
     }
 

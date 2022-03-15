@@ -813,7 +813,7 @@ public class OauthPlainIsolatedST extends OauthAbstractST {
     @AfterAll
     void tearDown(ExtensionContext extensionContext) throws Exception {
         // delete keycloak before namespace
-        KeycloakUtils.deleteKeycloak(INFRA_NAMESPACE);
+        KeycloakUtils.deleteKeycloak(Constants.INFRA_NAMESPACE, clusterOperator.getDeploymentNamespace());
         // delete namespace etc.
         super.afterAllMayOverride(extensionContext);
     }

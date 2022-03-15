@@ -4,7 +4,9 @@
  */
 package io.strimzi.systemtest.upgrade;
 
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.strimzi.api.kafka.model.KafkaResources;
+import io.strimzi.api.kafka.model.KafkaTopic;
 import io.strimzi.systemtest.Constants;
 import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.enums.OlmInstallationStrategy;
@@ -23,6 +25,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,7 @@ import java.util.List;
 
 import static io.strimzi.systemtest.Constants.OLM_UPGRADE;
 import static io.strimzi.systemtest.resources.ResourceManager.kubeClient;
+import static io.strimzi.test.k8s.KubeClusterResource.cmdKubeClient;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -56,6 +60,7 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
     private final String clusterName = "my-cluster";
     private final int messageUpgradeCount =  600;
     private KafkaClients kafkaBasicClientJob;
+    private KafkaTopic kafkaUpgradeTopic;
 
     @Test
     void testStrimziUpgrade(ExtensionContext extensionContext) throws IOException {
@@ -74,7 +79,7 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
         latestUpgradeData.put("proceduresAfterOperatorUpgrade", procedures);
         // This is needed to overwrite for 2.1.0 OLM
         latestUpgradeData.put("fromVersion", "2.0.1-1");
-        latestUpgradeData.put("toVersion", "HEAD");
+        latestUpgradeData.put("toVersion", Environment.OLM_OPERATOR_LATEST_RELEASE_VERSION);
         latestUpgradeData.put("toExamples", "HEAD");
         latestUpgradeData.put("urlTo", "HEAD");
 
@@ -84,16 +89,17 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
 
     private void performUpgradeVerification(JsonObject testParameters, ExtensionContext extensionContext) throws IOException {
         LOGGER.info("Upgrade data: {}", testParameters.toString());
-        String fromVersion = testParameters.getString("fromVersion");
+        final String fromVersion = testParameters.getString("fromVersion");
+        final String toVersion = testParameters.getString("toVersion");
         LOGGER.info("====================================================================================");
-        LOGGER.info("============== Verification version of CO: " + fromVersion + " => " + Environment.OLM_OPERATOR_LATEST_RELEASE_VERSION);
+        LOGGER.info("============== Verification version of CO: " + fromVersion + " => " + toVersion);
         LOGGER.info("====================================================================================");
 
         // 1. Create subscription (+ operator group) with manual approval strategy
         // 2. Approve installation
         //   a) get name of install-plan
         //   b) approve installation
-        clusterOperator.getOlmResource().create(Constants.INFRA_NAMESPACE, OlmInstallationStrategy.Manual, fromVersion);
+        clusterOperator.runManualOlmInstallation(fromVersion, "amq-streams-2.0.x");
 
         String url = testParameters.getString("urlFrom");
         File dir = FileUtils.downloadAndUnzip(url);
@@ -107,16 +113,29 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
 
         clusterOperator.getOlmResource().getClosedMapInstallPlan().put(clusterOperator.getOlmResource().getNonUsedInstallPlan(), Boolean.TRUE);
 
+        this.kafkaUpgradeTopic = new YAMLMapper().readValue(new File(dir, testParameters.getString("fromExamples") + "/examples/topic/kafka-topic.yaml"), KafkaTopic.class);
+        this.kafkaUpgradeTopic.getMetadata().setName(topicUpgradeName);
+        this.kafkaUpgradeTopic.getSpec().setReplicas(3);
+        this.kafkaUpgradeTopic.getSpec().setAdditionalProperty("min.insync.replicas", 2);
+
+        LOGGER.info("Deploy KafkaTopic: {}", this.kafkaUpgradeTopic.toString());
+
+        cmdKubeClient().applyContent(this.kafkaUpgradeTopic.toString());
+        ResourceManager.waitForResourceReadiness(KafkaTopic.RESOURCE_PLURAL + "." +
+            io.strimzi.api.kafka.model.Constants.V1BETA2 + "." + io.strimzi.api.kafka.model.Constants.RESOURCE_GROUP_NAME, topicUpgradeName);
+
         resourceManager.createResource(extensionContext, kafkaBasicClientJob.producerStrimzi());
         resourceManager.createResource(extensionContext, kafkaBasicClientJob.consumerStrimzi());
 
-        String clusterOperatorDeploymentName = ResourceManager.kubeClient().getDeploymentNameByPrefix(Environment.OLM_OPERATOR_DEPLOYMENT_NAME);
+        String clusterOperatorDeploymentName = kubeClient().getDeploymentNameByPrefix(Environment.OLM_OPERATOR_DEPLOYMENT_NAME);
         LOGGER.info("Old deployment name of cluster operator is {}", clusterOperatorDeploymentName);
 
         // ======== Cluster Operator upgrade starts ========
         makeSnapshots();
-        // wait until non-used install plan is present (sometimes install-plan did not append immediately and we need to wait for at least 10m)
-        OlmUtils.waitUntilNonUsedInstallPlanIsPresent(Environment.OLM_OPERATOR_LATEST_RELEASE_VERSION);
+        clusterOperator.getOlmResource().updateSubscription("stable", toVersion,
+            Constants.CO_OPERATION_TIMEOUT_DEFAULT, Constants.RECONCILIATION_INTERVAL, OlmInstallationStrategy.Manual);
+            // wait until non-used install plan is present (sometimes install-plan did not append immediately and we need to wait for at least 10m)
+        OlmUtils.waitUntilNonUsedInstallPlanIsPresent(toVersion);
 
         // Cluster Operator
         clusterOperator.getOlmResource().upgradeClusterOperator();
@@ -127,15 +146,16 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
         eoPods = DeploymentUtils.waitTillDepHasRolled(KafkaResources.entityOperatorDeploymentName(clusterName), 1, eoPods);
         // ======== Cluster Operator upgrade ends ========
 
-        clusterOperatorDeploymentName = ResourceManager.kubeClient().getDeploymentNameByPrefix(Environment.OLM_OPERATOR_DEPLOYMENT_NAME);
+        clusterOperatorDeploymentName = kubeClient().getDeploymentNameByPrefix(Environment.OLM_OPERATOR_DEPLOYMENT_NAME);
         LOGGER.info("New deployment name of cluster operator is {}", clusterOperatorDeploymentName);
         ResourceManager.setCoDeploymentName(clusterOperatorDeploymentName);
+        clusterOperator.getOlmResource().setDeploymentName(clusterOperatorDeploymentName);
 
         // verification that cluster operator has correct version (install-plan) - strimzi-cluster-operator.v[version]
         String afterUpgradeVersionOfCo = clusterOperator.getOlmResource().getClusterOperatorVersion();
 
         // if HEAD -> 6.6.6 version
-        assertThat(afterUpgradeVersionOfCo, is(Environment.OLM_APP_BUNDLE_PREFIX + ".v" + Environment.OLM_OPERATOR_LATEST_RELEASE_VERSION));
+        assertThat(afterUpgradeVersionOfCo, is(Environment.OLM_APP_BUNDLE_PREFIX + ".v" + toVersion));
 
         // ======== Kafka upgrade starts ========
         logPodImages(clusterName);
@@ -162,9 +182,6 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
             .withBindingsNamespaces(Collections.singletonList(Constants.INFRA_NAMESPACE))
             .withWatchingNamespaces(Constants.INFRA_NAMESPACE)
             .createInstallation();
-        // we do not run installation because we do it at the start of the upgrade process
-        cluster.createNamespace(Constants.INFRA_NAMESPACE);
-        cluster.setNamespace(Constants.INFRA_NAMESPACE);
 
         this.kafkaBasicClientJob = new KafkaClientsBuilder()
             .withProducerName(producerName)
@@ -175,5 +192,10 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
             .withMessageCount(messageUpgradeCount)
             .withDelayMs(1000)
             .build();
+    }
+
+    @AfterAll
+    void teardown() {
+        KubeClusterResource.cmdKubeClient().delete(kafkaYaml);
     }
 }
