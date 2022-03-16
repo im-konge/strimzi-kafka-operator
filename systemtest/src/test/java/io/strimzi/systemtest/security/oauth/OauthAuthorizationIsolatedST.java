@@ -5,6 +5,7 @@
 package io.strimzi.systemtest.security.oauth;
 
 import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.strimzi.api.kafka.model.CertSecretSourceBuilder;
 import io.strimzi.api.kafka.model.KafkaAuthorizationKeycloak;
 import io.strimzi.api.kafka.model.KafkaResources;
@@ -598,7 +599,13 @@ public class OauthAuthorizationIsolatedST extends OauthAbstractST {
         TestStorage testStorage = new TestStorage(extensionContext);
 
         // we have to create keycloak, team-a-client and team-b-client secret from `infra-namespace` to the new namespace
-        resourceManager.createResource(extensionContext, kubeClient().getSecret(INFRA_NAMESPACE, KeycloakInstance.KEYCLOAK_SECRET_NAME));
+        resourceManager.createResource(extensionContext,
+            new SecretBuilder(kubeClient().getSecret(INFRA_NAMESPACE, KeycloakInstance.KEYCLOAK_SECRET_NAME))
+                .editMetadata()
+                    // we have to remove owner references of Keycloak Secret to create it in different one
+                    .removeMatchingFromOwnerReferences(ownerReferenceBuilder -> ownerReferenceBuilder.getName().equals("keycloak"))
+                .endMetadata()
+                .build());
         resourceManager.createResource(extensionContext, kubeClient().getSecret(INFRA_NAMESPACE, TEAM_A_CLIENT_SECRET));
         resourceManager.createResource(extensionContext, kubeClient().getSecret(INFRA_NAMESPACE, TEAM_B_CLIENT_SECRET));
 
