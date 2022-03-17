@@ -196,6 +196,8 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
 
     @AfterAll
     void teardown() {
-        KubeClusterResource.cmdKubeClient().delete(kafkaYaml);
+        if (kafkaYaml != null) {
+            KubeClusterResource.cmdKubeClient().delete(kafkaYaml);
+        }
     }
 }
