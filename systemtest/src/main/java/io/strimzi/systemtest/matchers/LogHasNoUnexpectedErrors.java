@@ -79,7 +79,8 @@ public class LogHasNoUnexpectedErrors extends BaseMatcher<String> {
         ASSEMBLY_OPERATOR_RECONCILIATION_TIMEOUT("ERROR .*AssemblyOperator:[0-9]+ - Reconciliation.*[fF]ailed.*"),
         WATCHER_CLOSED_EXCEPTION("ERROR AbstractOperator:.+ - Watcher closed with exception in namespace .*"),
         CONCURRENT_RESOURCE_DELETION("io.strimzi.operator.cluster.operator.resource.ConcurrentDeletionException"),
-        RECOVERY_STS_DELETION("java\\.lang\\.IllegalStateException: Can't wait for StatefulSet: recovery-cluster-(kafka|zookeeper) in namespace: recovery-cluster-test to scale. Resource is no longer available.");
+        RECOVERY_STS_DELETION("java\\.lang\\.IllegalStateException: Can't wait for StatefulSet: recovery-cluster-(kafka|zookeeper) in namespace: recovery-cluster-test to scale. Resource is no longer available."),
+        ROLLER_INVALID_LOG("ERROR KafkaRoller:[0-9]+ - Reconciliation.*: Error doing dynamic config update\n.* Cannot update these configs dynamically: Set\\(default\\.replication\\.factor\\)");
 
         final String name;
 
