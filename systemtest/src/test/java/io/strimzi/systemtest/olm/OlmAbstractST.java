@@ -26,13 +26,16 @@ import io.strimzi.systemtest.utils.kafkaUtils.KafkaTopicUtils;
 import io.strimzi.systemtest.utils.kafkaUtils.KafkaUserUtils;
 import io.strimzi.systemtest.utils.kafkaUtils.KafkaUtils;
 import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
 
 import static io.strimzi.test.k8s.KubeClusterResource.cmdKubeClient;
 
 public class OlmAbstractST extends AbstractST {
+
+    private static final Logger LOGGER = LogManager.getLogger(OlmAbstractST.class);
 
     void doTestDeployExampleKafka() {
         JsonObject kafkaResource = OlmResource.getExampleResources().get(Kafka.RESOURCE_KIND);
@@ -110,5 +113,6 @@ public class OlmAbstractST extends AbstractST {
         cmdKubeClient().deleteContent(OlmResource.getExampleResources().get(KafkaTopic.RESOURCE_KIND).toString());
         cmdKubeClient().deleteContent(OlmResource.getExampleResources().get(KafkaUser.RESOURCE_KIND).toString());
         cmdKubeClient().deleteContent(OlmResource.getExampleResources().get(Kafka.RESOURCE_KIND).toString());
+        KafkaTopicUtils.deleteTopicsFromNamespace(clusterOperator.getDeploymentNamespace());
     }
 }

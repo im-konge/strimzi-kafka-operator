@@ -17,6 +17,7 @@ import io.strimzi.systemtest.utils.ClientUtils;
 import io.strimzi.systemtest.utils.FileUtils;
 import io.strimzi.systemtest.utils.RollingUpdateUtils;
 import io.strimzi.systemtest.utils.TestKafkaVersion;
+import io.strimzi.systemtest.utils.kafkaUtils.KafkaTopicUtils;
 import io.strimzi.systemtest.utils.kubeUtils.controllers.DeploymentUtils;
 import io.strimzi.systemtest.utils.specific.OlmUtils;
 import io.strimzi.systemtest.annotations.IsolatedSuite;
@@ -199,5 +200,6 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
         if (kafkaYaml != null) {
             KubeClusterResource.cmdKubeClient().delete(kafkaYaml);
         }
+        KafkaTopicUtils.deleteTopicsFromNamespace(clusterOperator.getDeploymentNamespace());
     }
 }

@@ -4,6 +4,7 @@
  */
 package io.strimzi.systemtest.utils.kafkaUtils;
 
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.strimzi.api.kafka.model.KafkaTopic;
 import io.strimzi.systemtest.Constants;
 import io.strimzi.systemtest.cli.KafkaCmdClient;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static io.strimzi.systemtest.enums.CustomResourceStatus.NotReady;
 import static io.strimzi.systemtest.enums.CustomResourceStatus.Ready;
+import static io.strimzi.systemtest.resources.crd.KafkaTopicResource.kafkaTopicClient;
 import static io.strimzi.test.k8s.KubeClusterResource.cmdKubeClient;
 import static io.strimzi.test.k8s.KubeClusterResource.kubeClient;
 
@@ -217,5 +219,16 @@ public class KafkaTopicUtils {
         KafkaTopicUtils.getAllKafkaTopicsWithPrefix(namespace, prefix).forEach(topic ->
             cmdKubeClient().namespace(namespace).deleteByName(KafkaTopic.RESOURCE_SINGULAR, topic.getMetadata().getName())
         );
+    }
+
+    public static void deleteTopicsFromNamespace(final String namespaceName) {
+        List<KafkaTopic> topics = kafkaTopicClient().inNamespace(namespaceName).list().getItems();
+
+        if (topics != null) {
+            topics.forEach(kafkaTopic -> {
+                LOGGER.info("Deleting KafkaTopic: {} in namespace: {}", kafkaTopic.getMetadata().getName(), kafkaTopic.getMetadata().getNamespace());
+                kafkaTopicClient().inNamespace(namespaceName).withPropagationPolicy(DeletionPropagation.FOREGROUND).delete();
+            });
+        }
     }
 }

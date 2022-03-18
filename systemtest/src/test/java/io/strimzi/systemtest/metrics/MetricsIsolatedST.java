@@ -650,6 +650,8 @@ public class MetricsIsolatedST extends AbstractST {
     void setupEnvironment(ExtensionContext extensionContext) throws Exception {
         clusterOperator.unInstall();
         clusterOperator = clusterOperator.defaultInstallation()
+            // we need to use `local` and not shared extension context to fully delete `NAMESPACE` at the end of the class
+            .withExtensionContext(extensionContext)
             .withWatchingNamespaces(clusterOperator.getDeploymentNamespace() + "," + SECOND_NAMESPACE)
             .withBindingsNamespaces(Arrays.asList(clusterOperator.getDeploymentNamespace(), SECOND_NAMESPACE))
             .createInstallation()

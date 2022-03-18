@@ -7,6 +7,7 @@ package io.strimzi.systemtest.parallel;
 import io.strimzi.systemtest.Constants;
 import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.resources.kubernetes.NetworkPolicyResource;
+import io.strimzi.systemtest.resources.operator.SetupClusterOperator;
 import io.strimzi.systemtest.utils.StUtils;
 import io.strimzi.test.TestUtils;
 import io.strimzi.test.k8s.KubeClusterResource;
@@ -178,7 +179,7 @@ public class TestSuiteNamespaceManager {
         if (namespacesToDelete != null) {
             // delete namespaces for specific test suite (we can not delete in parallel because of ConcurrentModificationException)
             namespacesToDelete.forEach(ns -> {
-                if (!ns.equals(Constants.INFRA_NAMESPACE)) {
+                if (!ns.equals(SetupClusterOperator.getInstanceHolder().getDeploymentNamespace())) {
                     KubeClusterResource.getInstance().deleteNamespace(collectorElement, ns);
                 }
             });

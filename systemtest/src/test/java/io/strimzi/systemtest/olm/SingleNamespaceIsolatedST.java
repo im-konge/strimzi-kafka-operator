@@ -85,6 +85,8 @@ public class SingleNamespaceIsolatedST extends OlmAbstractST {
         // delete shared ClusterOperator
         clusterOperator.unInstall();
         clusterOperator = clusterOperator.defaultInstallation()
+            // we need to use `local` and not shared extension context to fully delete `NAMESPACE` at the end of the class
+            .withExtensionContext(extensionContext)
             .withNamespace(NAMESPACE)
             .withWatchingNamespaces(NAMESPACE)
             .withBindingsNamespaces(Collections.singletonList(NAMESPACE))
