@@ -312,6 +312,11 @@ public class SetupClusterOperator {
             olmResource = new OlmResource(namespaceInstallTo);
             olmResource.create(extensionContext, operationTimeout, reconciliationInterval);
         }
+
+        // copy image-pull secret
+        if (Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET != null && !Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET.isEmpty()) {
+            StUtils.copyImagePullSecret(namespaceInstallTo);
+        }
     }
 
     private void initializeTestClassAndCaseName() {
