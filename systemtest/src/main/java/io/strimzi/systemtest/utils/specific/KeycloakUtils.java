@@ -25,7 +25,7 @@ public class KeycloakUtils {
     public final static String PATH_TO_KEYCLOAK_PREPARE_SCRIPT = "../systemtest/src/test/resources/oauth2/prepare_keycloak_operator.sh";
     public final static String PATH_TO_KEYCLOAK_TEARDOWN_SCRIPT = "../systemtest/src/test/resources/oauth2/teardown_keycloak_operator.sh";
 
-    public final static String LATEST_KEYCLOAK_VERSION = "15.0.2";
+    public final static String LATEST_KEYCLOAK_VERSION = "17.0.0";
     public final static String OLD_KEYCLOAK_VERSION = "11.0.1";
 
 

@@ -191,6 +191,7 @@ class AllNamespaceIsolatedST extends AbstractNamespaceST {
 
         clusterOperator.unInstall();
         clusterOperator = clusterOperator.defaultInstallation()
+            .withExtensionContext(extensionContext)
             .withWatchingNamespaces(Constants.WATCH_ALL_NAMESPACES)
             .withBindingsNamespaces(Arrays.asList(clusterOperator.getDeploymentNamespace(), SECOND_NAMESPACE, THIRD_NAMESPACE))
             .createInstallation()

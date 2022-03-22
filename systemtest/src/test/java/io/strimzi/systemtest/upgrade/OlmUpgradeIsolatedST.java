@@ -198,8 +198,9 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
     @AfterAll
     void teardown() {
         if (kafkaYaml != null) {
-            KubeClusterResource.cmdKubeClient().delete(kafkaYaml);
+            KubeClusterResource.cmdKubeClient().namespace(Constants.INFRA_NAMESPACE).delete(kafkaYaml);
+            KubeClusterResource.kubeClient().getClient().persistentVolumeClaims().inNamespace(Constants.INFRA_NAMESPACE).delete();
         }
-        KafkaTopicUtils.deleteTopicsFromNamespace(clusterOperator.getDeploymentNamespace());
+        KafkaTopicUtils.deleteTopicsFromNamespace(Constants.INFRA_NAMESPACE);
     }
 }
