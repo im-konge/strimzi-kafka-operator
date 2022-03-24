@@ -1568,10 +1568,10 @@ class MirrorMaker2IsolatedST extends AbstractST {
 
         Map<String, String> kafkaSourcePods = PodUtils.podSnapshot(testStorage.getNamespaceName(), kafkaSourceSelector);
         Map<String, String> zkSourcePods = PodUtils.podSnapshot(testStorage.getNamespaceName(), zkSourceSelector);
-        Map<String, String> eoSourcePods = DeploymentUtils.depSnapshot(KafkaResources.entityOperatorDeploymentName(kafkaClusterSourceName));
+        Map<String, String> eoSourcePods = DeploymentUtils.depSnapshot(testStorage.getNamespaceName(), KafkaResources.entityOperatorDeploymentName(kafkaClusterSourceName));
         Map<String, String> kafkaTargetPods = PodUtils.podSnapshot(testStorage.getNamespaceName(), kafkaTargetSelector);
         Map<String, String> zkTargetPods = PodUtils.podSnapshot(testStorage.getNamespaceName(), zkTargetSelector);
-        Map<String, String> eoTargetPods = DeploymentUtils.depSnapshot(KafkaResources.entityOperatorDeploymentName(kafkaClusterTargetName));
+        Map<String, String> eoTargetPods = DeploymentUtils.depSnapshot(testStorage.getNamespaceName(), KafkaResources.entityOperatorDeploymentName(kafkaClusterTargetName));
 
         LOGGER.info("Renew Clients CA secret for Source cluster via annotation");
         String sourceClientsCaSecretName = KafkaResources.clientsCaCertificateSecretName(kafkaClusterSourceName);
@@ -1587,6 +1587,7 @@ class MirrorMaker2IsolatedST extends AbstractST {
 
         LOGGER.info("Send and receive messages after clients certs were removed");
         internalKafkaClient = internalKafkaClient.toBuilder()
+            .withNamespaceName(testStorage.getNamespaceName())
             .withTopicName(topicSourceNameA)
             .withClusterName(kafkaClusterSourceName)
             .withKafkaUsername(kafkaUserSourceName)
@@ -1595,6 +1596,7 @@ class MirrorMaker2IsolatedST extends AbstractST {
         sent = internalKafkaClient.sendMessagesTls();
 
         internalKafkaClient = internalKafkaClient.toBuilder()
+            .withNamespaceName(testStorage.getNamespaceName())
             .withTopicName(topicTargetNameA)
             .withClusterName(kafkaClusterTargetName)
             .withKafkaUsername(kafkaUserTargetName)
@@ -1610,7 +1612,7 @@ class MirrorMaker2IsolatedST extends AbstractST {
         SecretUtils.annotateSecret(testStorage.getNamespaceName(), sourceClusterCaSecretName, Ca.ANNO_STRIMZI_IO_FORCE_RENEW, "true");
         zkSourcePods = RollingUpdateUtils.waitTillComponentHasRolledAndPodsReady(testStorage.getNamespaceName(), zkSourceSelector, 3, zkSourcePods);
         kafkaSourcePods = RollingUpdateUtils.waitTillComponentHasRolledAndPodsReady(testStorage.getNamespaceName(), kafkaSourceSelector, 3, kafkaSourcePods);
-        eoSourcePods = DeploymentUtils.waitTillDepHasRolled(KafkaResources.entityOperatorDeploymentName(kafkaClusterSourceName), 1, eoSourcePods);
+        eoSourcePods = DeploymentUtils.waitTillDepHasRolled(testStorage.getNamespaceName(), KafkaResources.entityOperatorDeploymentName(kafkaClusterSourceName), 1, eoSourcePods);
         mmSnapshot = DeploymentUtils.waitTillDepHasRolled(testStorage.getNamespaceName(), mm2DeploymentName, 1, mmSnapshot);
 
         LOGGER.info("Renew Cluster CA secret for Target clusters via annotation");
@@ -1618,11 +1620,12 @@ class MirrorMaker2IsolatedST extends AbstractST {
         SecretUtils.annotateSecret(testStorage.getNamespaceName(), targetClusterCaSecretName, Ca.ANNO_STRIMZI_IO_FORCE_RENEW, "true");
         zkTargetPods = RollingUpdateUtils.waitTillComponentHasRolledAndPodsReady(testStorage.getNamespaceName(), zkTargetSelector, 3, zkTargetPods);
         kafkaTargetPods = RollingUpdateUtils.waitTillComponentHasRolledAndPodsReady(testStorage.getNamespaceName(), kafkaTargetSelector, 3, kafkaTargetPods);
-        eoTargetPods = DeploymentUtils.waitTillDepHasRolled(KafkaResources.entityOperatorDeploymentName(kafkaClusterTargetName), 1, eoTargetPods);
+        eoTargetPods = DeploymentUtils.waitTillDepHasRolled(testStorage.getNamespaceName(), KafkaResources.entityOperatorDeploymentName(kafkaClusterTargetName), 1, eoTargetPods);
         DeploymentUtils.waitTillDepHasRolled(testStorage.getNamespaceName(), mm2DeploymentName, 1, mmSnapshot);
 
         LOGGER.info("Send and receive messages after clients certs were removed");
         internalKafkaClient = internalKafkaClient.toBuilder()
+            .withNamespaceName(testStorage.getNamespaceName())
             .withTopicName(topicSourceNameB)
             .withClusterName(kafkaClusterSourceName)
             .withKafkaUsername(kafkaUserSourceName)
@@ -1631,6 +1634,7 @@ class MirrorMaker2IsolatedST extends AbstractST {
         sent = internalKafkaClient.sendMessagesTls();
 
         internalKafkaClient = internalKafkaClient.toBuilder()
+            .withNamespaceName(testStorage.getNamespaceName())
             .withTopicName(topicTargetNameB)
             .withClusterName(kafkaClusterTargetName)
             .withKafkaUsername(kafkaUserTargetName)
