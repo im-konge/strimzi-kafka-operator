@@ -151,10 +151,10 @@ public class Environment {
     /**
      * Defaults
      */
-    public static final String STRIMZI_ORG_DEFAULT = "strimzi";
-    public static final String STRIMZI_TAG_DEFAULT = "latest";
+    public static final String STRIMZI_ORG_DEFAULT = "scholzj";
+    public static final String STRIMZI_TAG_DEFAULT = "fips";
     public static final String STRIMZI_REGISTRY_DEFAULT = "quay.io";
-    public static final String TEST_CLIENTS_ORG_DEFAULT = "strimzi-test-clients";
+    public static final String TEST_CLIENTS_ORG_DEFAULT = "lkral";
     private static final String TEST_LOG_DIR_DEFAULT = TestUtils.USER_PATH + "/../systemtest/target/logs/";
     private static final String STRIMZI_LOG_LEVEL_DEFAULT = "DEBUG";
     public static final String COMPONENTS_IMAGE_PULL_POLICY_ENV_DEFAULT = Constants.IF_NOT_PRESENT_IMAGE_PULL_POLICY;
@@ -171,7 +171,7 @@ public class Environment {
 
     private static final String ST_KAFKA_VERSION_DEFAULT = TestKafkaVersion.getDefaultSupportedKafkaVersion();
     private static final String ST_CLIENTS_KAFKA_VERSION_DEFAULT = "3.1.0";
-    public static final String TEST_CLIENTS_VERSION_DEFAULT = "0.2.0";
+    public static final String TEST_CLIENTS_VERSION_DEFAULT = "latest-amd64";
 
     public static final String ST_FILE_PLUGIN_URL_DEFAULT = "https://repo1.maven.org/maven2/org/apache/kafka/connect-file/" + ST_KAFKA_VERSION_DEFAULT + "/connect-file-" + ST_KAFKA_VERSION_DEFAULT + ".jar";
     /**
