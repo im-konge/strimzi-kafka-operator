@@ -7,6 +7,7 @@ package io.strimzi.systemtest.parallel;
 import io.strimzi.systemtest.Constants;
 import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.resources.kubernetes.NetworkPolicyResource;
+import io.strimzi.systemtest.resources.operator.SetupClusterOperator;
 import io.strimzi.systemtest.utils.StUtils;
 import io.strimzi.test.TestUtils;
 import io.strimzi.test.k8s.KubeClusterResource;
@@ -130,7 +131,7 @@ public class TestSuiteNamespaceManager {
             LOGGER.debug("Test suite `" + requiredClassName + "` creates these additional namespaces:" + namespaces.toString());
 
             for (String namespaceName : namespaces) {
-                if (namespaceName.equals(Constants.INFRA_NAMESPACE)) {
+                if (namespaceName.equals(SetupClusterOperator.getInstanceHolder().getDeploymentNamespace())) {
                     continue;
                 }
                 KubeClusterResource.getInstance().createNamespace(CollectorElement.createCollectorElement(testSuite), namespaceName);

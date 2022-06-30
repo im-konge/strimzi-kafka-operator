@@ -180,6 +180,8 @@ class AllNamespaceIsolatedST extends AbstractNamespaceST {
 
         clusterOperator.unInstall();
         clusterOperator = clusterOperator.defaultInstallation()
+            // we need to use `local` and not shared extension context to fully delete `NAMESPACE` at the end of the class
+            .withExtensionContext(extensionContext)
             .withWatchingNamespaces(Constants.WATCH_ALL_NAMESPACES)
             .withBindingsNamespaces(Arrays.asList(clusterOperator.getDeploymentNamespace(), SECOND_NAMESPACE, THIRD_NAMESPACE))
             .createInstallation()

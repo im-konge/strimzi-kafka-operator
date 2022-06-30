@@ -5,7 +5,6 @@
 package io.strimzi.systemtest.watcher;
 
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
-import io.strimzi.systemtest.BeforeAllOnce;
 import io.strimzi.systemtest.annotations.IsolatedSuite;
 import io.strimzi.systemtest.cli.KafkaCmdClient;
 import io.strimzi.systemtest.resources.crd.KafkaTopicResource;
@@ -78,7 +77,8 @@ class MultipleNamespaceIsolatedST extends AbstractNamespaceST {
     private void deployTestSpecificResources(ExtensionContext extensionContext) {
         clusterOperator.unInstall();
         clusterOperator = new SetupClusterOperator.SetupClusterOperatorBuilder()
-            .withExtensionContext(BeforeAllOnce.getSharedExtensionContext())
+            // we need to use `local` and not shared extension context to fully delete `NAMESPACE` at the end of the class
+            .withExtensionContext(extensionContext)
             .withNamespace(INFRA_NAMESPACE)
             .withWatchingNamespaces(String.join(",", INFRA_NAMESPACE, SECOND_NAMESPACE))
             .withBindingsNamespaces(Arrays.asList(INFRA_NAMESPACE, SECOND_NAMESPACE))

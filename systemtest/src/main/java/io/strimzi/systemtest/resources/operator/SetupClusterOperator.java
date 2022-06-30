@@ -194,6 +194,8 @@ public class SetupClusterOperator {
      */
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     public SetupClusterOperator runInstallation() {
+        this.initializeTestClassAndCaseName();
+
         LOGGER.info("Cluster operator installation configuration:\n{}", this::prettyPrint);
         LOGGER.debug("Cluster operator installation configuration:\n{}", this::toString);
         // if it's shared context (before suite) skip
@@ -220,18 +222,24 @@ public class SetupClusterOperator {
     }
 
     public SetupClusterOperator runBundleInstallation() {
+        this.initializeTestClassAndCaseName();
+
         LOGGER.info("Cluster operator installation configuration:\n{}", this::toString);
         bundleInstallation();
         return this;
     }
 
     public SetupClusterOperator runOlmInstallation() {
+        this.initializeTestClassAndCaseName();
+
         LOGGER.info("Cluster operator installation configuration:\n{}", this::toString);
         olmInstallation();
         return this;
     }
 
     public SetupClusterOperator runManualOlmInstallation(final String fromVersion, final String channelName) {
+        this.initializeTestClassAndCaseName();
+
         if (isClusterOperatorNamespaceNotCreated()) {
             cluster.setNamespace(namespaceInstallTo);
             cluster.createNamespaces(CollectorElement.createCollectorElement(testClassName, testMethodName), namespaceInstallTo, bindingsNamespaces);
@@ -243,7 +251,13 @@ public class SetupClusterOperator {
         return this;
     }
 
-
+    private void initializeTestClassAndCaseName() {
+        // if it's shared context (before suite) skip
+        if (BeforeAllOnce.getSharedExtensionContext() != this.extensionContext) {
+            this.testClassName = this.extensionContext.getTestClass().isPresent() ? this.extensionContext.getRequiredTestClass().getName() : "";
+            this.testMethodName = this.extensionContext.getTestMethod().isPresent() ? this.extensionContext.getRequiredTestMethod().getName() : "";
+        }
+    }
     private void bundleInstallation() {
         LOGGER.info("Install ClusterOperator via Yaml bundle");
         // check if namespace is already created
