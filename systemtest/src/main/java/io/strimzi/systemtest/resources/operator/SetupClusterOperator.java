@@ -310,6 +310,12 @@ public class SetupClusterOperator {
                     cluster.createNamespaces(CollectorElement.createCollectorElement(testClassName, testMethodName), namespaceInstallTo, bindingsNamespaces);
                     extensionContext.getStore(ExtensionContext.Namespace.GLOBAL).put(Constants.PREPARE_OPERATOR_ENV_KEY + namespaceInstallTo, false);
                 }
+
+                // copy image-pull secret
+                if (Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET != null && !Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET.isEmpty()) {
+                    StUtils.copyImagePullSecret(namespaceInstallTo);
+                }
+
                 createClusterRoleBindings();
                 olmResource = new OlmResource(namespaceInstallTo);
                 olmResource.create(extensionContext, operationTimeout, reconciliationInterval);

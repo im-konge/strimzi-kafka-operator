@@ -4,6 +4,7 @@
  */
 package io.strimzi.systemtest.upgrade;
 
+import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.utils.StUtils;
 import io.strimzi.systemtest.utils.kubeUtils.objects.PodUtils;
 import io.strimzi.systemtest.annotations.IsolatedSuite;
@@ -76,6 +77,9 @@ public class StrimziDowngradeIsolatedST extends AbstractUpgradeST {
     @BeforeEach
     void setupEnvironment() {
         cluster.createNamespace(INFRA_NAMESPACE);
+        if (Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET != null && !Environment.SYSTEM_TEST_STRIMZI_IMAGE_PULL_SECRET.isEmpty()) {
+            StUtils.copyImagePullSecret(INFRA_NAMESPACE);
+        }
     }
 
     @AfterEach
