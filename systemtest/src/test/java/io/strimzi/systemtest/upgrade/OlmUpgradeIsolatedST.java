@@ -99,7 +99,7 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
         // 2. Approve installation
         //   a) get name of install-plan
         //   b) approve installation
-        clusterOperator.runManualOlmInstallation(fromVersion, "strimzi-0.27.x");
+        clusterOperator.runManualOlmInstallation(fromVersion, "amq-streams-2.1.x");
 
         String url = testParameters.getString("urlFrom");
         File dir = FileUtils.downloadAndUnzip(url);

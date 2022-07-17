@@ -478,14 +478,14 @@ class ConnectBuilderIsolatedST extends AbstractST {
     @Tag(ACCEPTANCE)
     @ParallelTest
     void testBuildPluginUsingMavenCoordinatesArtifacts(ExtensionContext extensionContext) {
-        TestStorage storage = new TestStorage(extensionContext, INFRA_NAMESPACE);
+        TestStorage storage = new TestStorage(extensionContext, clusterOperator.getDeploymentNamespace());
 
         final String imageName = getImageNameForTestCase();
         final String connectorName = storage.getClusterName() + "-camel-connector";
 
         resourceManager.createResource(extensionContext,
-            KafkaTopicTemplates.topic(INFRA_NAMESPACE, storage.getTopicName()).build(),
-            KafkaConnectTemplates.kafkaConnect(extensionContext, storage.getClusterName(), INFRA_NAMESPACE, INFRA_NAMESPACE, 1, false)
+            KafkaTopicTemplates.topic(clusterOperator.getDeploymentNamespace(), storage.getTopicName()).build(),
+            KafkaConnectTemplates.kafkaConnect(extensionContext, storage.getClusterName(), clusterOperator.getDeploymentNamespace(), clusterOperator.getDeploymentNamespace(), 1, false)
                 .editMetadata()
                     .addToAnnotations(Annotations.STRIMZI_IO_USE_CONNECTOR_RESOURCES, "true")
                 .endMetadata()
@@ -516,14 +516,14 @@ class ConnectBuilderIsolatedST extends AbstractST {
 
         KafkaClients kafkaClient = new KafkaClientsBuilder()
             .withConsumerName(storage.getConsumerName())
-            .withBootstrapAddress(KafkaResources.plainBootstrapAddress(INFRA_NAMESPACE))
+            .withBootstrapAddress(KafkaResources.plainBootstrapAddress(clusterOperator.getDeploymentNamespace()))
             .withTopicName(storage.getTopicName())
             .withMessageCount(MESSAGE_COUNT)
             .withDelayMs(0)
             .build();
 
         resourceManager.createResource(extensionContext, kafkaClient.consumerStrimzi());
-        ClientUtils.waitForClientSuccess(storage.getConsumerName(), INFRA_NAMESPACE, MESSAGE_COUNT);
+        ClientUtils.waitForClientSuccess(storage.getConsumerName(), clusterOperator.getDeploymentNamespace(), MESSAGE_COUNT);
     }
 
     private String getPluginFileNameFromConnectPod(String connectPodName) {
@@ -544,8 +544,8 @@ class ConnectBuilderIsolatedST extends AbstractST {
             .createInstallation()
             .runInstallation();
 
-        outputRegistry = Environment.getImageOutputRegistry() + "/" + INFRA_NAMESPACE;
+        outputRegistry = Environment.getImageOutputRegistry() + "/" + clusterOperator.getDeploymentNamespace();
 
-        resourceManager.createResource(extensionContext, KafkaTemplates.kafkaEphemeral(INFRA_NAMESPACE, 3).build());
+        resourceManager.createResource(extensionContext, KafkaTemplates.kafkaEphemeral(clusterOperator.getDeploymentNamespace(), 3).build());
     }
 }
