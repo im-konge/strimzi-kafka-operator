@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapKeySelector;
 import io.fabric8.kubernetes.api.model.ConfigMapKeySelectorBuilder;
 import io.fabric8.kubernetes.api.model.LabelSelector;
+import io.strimzi.api.kafka.KafkaTopicList;
 import io.strimzi.api.kafka.model.JmxPrometheusExporterMetrics;
 import io.strimzi.api.kafka.model.JmxPrometheusExporterMetricsBuilder;
 import io.strimzi.api.kafka.model.Kafka;
@@ -25,6 +26,7 @@ import io.strimzi.api.kafka.model.KafkaRebalance;
 import io.strimzi.api.kafka.model.KafkaResources;
 import io.strimzi.systemtest.AbstractST;
 import io.strimzi.systemtest.Constants;
+import io.strimzi.systemtest.Environment;
 import io.strimzi.systemtest.annotations.IsolatedSuite;
 import io.strimzi.systemtest.annotations.IsolatedTest;
 import io.strimzi.systemtest.annotations.ParallelTest;
@@ -53,6 +55,7 @@ import io.strimzi.systemtest.utils.kubeUtils.objects.PodUtils;
 import io.strimzi.systemtest.utils.specific.CruiseControlUtils;
 import io.strimzi.test.TestUtils;
 import io.strimzi.test.executor.Exec;
+import io.strimzi.test.k8s.cluster.OpenShift;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hamcrest.CoreMatchers;
@@ -671,6 +674,7 @@ public class MetricsIsolatedST extends AbstractST {
     @BeforeAll
     void setupEnvironment(ExtensionContext extensionContext) throws Exception {
         clusterOperator.unInstall();
+
         clusterOperator = clusterOperator.defaultInstallation()
             // we need to use `local` and not shared extension context to fully delete `NAMESPACE` at the end of the class
             .withExtensionContext(extensionContext)
@@ -678,6 +682,14 @@ public class MetricsIsolatedST extends AbstractST {
             .withBindingsNamespaces(Arrays.asList(clusterOperator.getDeploymentNamespace(), SECOND_NAMESPACE))
             .createInstallation()
             .runInstallation();
+
+        if (Environment.isOlmInstall()) {
+            KafkaTopicList topicList = KafkaTopicResource.kafkaTopicClient().inNamespace(OpenShift.OLM_NAMESPACE).list();
+            if (topicList != null && topicList.getItems().size() > 0) {
+                KafkaTopicResource.kafkaTopicClient().inNamespace(OpenShift.OLM_NAMESPACE).delete(topicList.getItems());
+                topicList.getItems().forEach(topic -> KafkaTopicUtils.waitForKafkaTopicDeletion(topic.getMetadata().getName()));
+            }
+        }
 
         final String scraperName = clusterOperator.getDeploymentNamespace() + "-" + Constants.SCRAPER_NAME;
         final String secondScraperName = SECOND_NAMESPACE + "-" + Constants.SCRAPER_NAME;
