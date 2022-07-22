@@ -50,6 +50,7 @@ import io.strimzi.systemtest.utils.ClientUtils;
 import io.strimzi.systemtest.utils.StUtils;
 import io.strimzi.systemtest.utils.kafkaUtils.KafkaTopicUtils;
 import io.strimzi.systemtest.utils.kafkaUtils.KafkaUserUtils;
+import io.strimzi.systemtest.utils.kubeUtils.controllers.ConfigMapUtils;
 import io.strimzi.systemtest.utils.kubeUtils.controllers.DeploymentUtils;
 import io.strimzi.systemtest.utils.kubeUtils.objects.PodUtils;
 import io.strimzi.systemtest.utils.specific.CruiseControlUtils;
@@ -534,8 +535,7 @@ public class MetricsIsolatedST extends AbstractST {
         PodUtils.verifyThatRunningPodsAreStable(SECOND_NAMESPACE, SECOND_CLUSTER);
 
         for (String cmName : StUtils.getKafkaConfigurationConfigMaps(SECOND_CLUSTER, 1)) {
-            ConfigMap actualCm = kubeClient(SECOND_NAMESPACE).getConfigMap(cmName);
-            assertThat(actualCm.getData().get(Constants.METRICS_CONFIG_JSON_NAME), is(metricsConfigJson));
+            ConfigMapUtils.waitForConfigMapDataChange(SECOND_NAMESPACE, cmName, Constants.METRICS_CONFIG_JSON_NAME, metricsConfigJson);
         }
 
         // update metrics
@@ -551,8 +551,7 @@ public class MetricsIsolatedST extends AbstractST {
         PodUtils.verifyThatRunningPodsAreStable(SECOND_NAMESPACE, SECOND_CLUSTER);
 
         for (String cmName : StUtils.getKafkaConfigurationConfigMaps(SECOND_CLUSTER, 1)) {
-            ConfigMap actualCm = kubeClient(SECOND_NAMESPACE).getConfigMap(cmName);
-            assertThat(actualCm.getData().get(Constants.METRICS_CONFIG_JSON_NAME), is(metricsConfigJson.replace("true", "false")));
+            ConfigMapUtils.waitForConfigMapDataChange(SECOND_NAMESPACE, cmName, Constants.METRICS_CONFIG_JSON_NAME, metricsConfigJson.replace("true", "false"));
         }
     }
 

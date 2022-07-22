@@ -162,7 +162,7 @@ public class OauthTlsIsolatedST extends OauthAbstractST {
             .build());
 
         String kafkaConnectPodName = kubeClient(clusterOperator.getDeploymentNamespace()).listPods(clusterOperator.getDeploymentNamespace(), clusterName, Labels.STRIMZI_KIND_LABEL, KafkaConnect.RESOURCE_KIND).get(0).getMetadata().getName();
-        String scraperPodName = kubeClient().listPodsByPrefixInName(clusterName + "-" + Constants.SCRAPER_NAME).get(0).getMetadata().getName();
+        String scraperPodName = kubeClient().listPodsByPrefixInName(clusterOperator.getDeploymentNamespace(), clusterName + "-" + Constants.SCRAPER_NAME).get(0).getMetadata().getName();
         KafkaConnectUtils.waitUntilKafkaConnectRestApiIsAvailable(clusterOperator.getDeploymentNamespace(), kafkaConnectPodName);
 
         KafkaConnectorUtils.createFileSinkConnector(clusterOperator.getDeploymentNamespace(), scraperPodName, topicName, Constants.DEFAULT_SINK_FILE_PATH, KafkaConnectResources.url(clusterName, clusterOperator.getDeploymentNamespace(), 8083));

@@ -60,4 +60,11 @@ public class ConfigMapUtils {
             LOGGER.info("ConfigMap {} label {} change to {}", configMapName, labelKey, null);
         }
     }
+
+    public static void waitForConfigMapDataChange(String namespaceName, String configMapName, String dataName, String expectedValue) {
+        LOGGER.info("Waiting for ConfigMap: {} in namespace: {} will change the data: {} to {}", configMapName, namespaceName, dataName, expectedValue);
+        TestUtils.waitFor("Kafka configMap data" + dataName + " is not changed", Constants.POLL_INTERVAL_FOR_RESOURCE_READINESS,
+            Constants.GLOBAL_TIMEOUT,
+            () -> kubeClient().getConfigMap(namespaceName, configMapName).getData().get(dataName).equals(expectedValue));
+    }
 }

@@ -1898,7 +1898,7 @@ public class ListenersST extends AbstractST {
             .withConsumerGroupName(ClientUtils.generateRandomConsumerGroup())
             .build();
 
-        int sent = 6 * MESSAGE_COUNT;
+        int sent = externalKafkaClient.sendMessagesTls() + (5 * MESSAGE_COUNT);
 
         externalKafkaClient = externalKafkaClient.toBuilder()
             .withMessageCount(6 * MESSAGE_COUNT)
