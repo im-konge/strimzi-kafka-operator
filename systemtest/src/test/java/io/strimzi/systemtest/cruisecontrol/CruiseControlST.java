@@ -189,7 +189,11 @@ public class CruiseControlST extends AbstractST {
         KafkaResource.replaceKafkaResourceInSpecificNamespace(clusterName, kafka -> kafka.getSpec().setCruiseControl(new CruiseControlSpec()), namespace);
 
         RollingUpdateUtils.waitTillComponentHasRolled(namespace, kafkaSelector, 3, kafkaPods);
+        DeploymentUtils.waitForDeploymentAndPodsReady(namespace, CruiseControlResources.deploymentName(clusterName), 1);
 
+        // refreshed by anno - issue with automatic refresh of KR - https://github.com/strimzi/strimzi-kafka-operator/pull/6890 will fix it
+        // it's not a blocker, it will be just documented
+        KafkaRebalanceUtils.annotateKafkaRebalanceResource(new Reconciliation("test", KafkaRebalance.RESOURCE_KIND, namespace, clusterName), namespace, clusterName, KafkaRebalanceAnnotation.refresh);
         KafkaRebalanceUtils.doRebalancingProcess(new Reconciliation("test", KafkaRebalance.RESOURCE_KIND, namespace, clusterName), namespace, clusterName);
 
         LOGGER.info("Annotating KafkaRebalance: {} with 'refresh' anno", clusterName);
