@@ -163,7 +163,7 @@
   third-party-libs: 3.1.x
   supported: false
   default: false
-- version: 3.2.0
+- version: 3.2.1
   format: 3.2
   protocol: 3.2
   url: https://archive.apache.org/dist/kafka/3.2.0/kafka_2.13-3.2.0.tgz
