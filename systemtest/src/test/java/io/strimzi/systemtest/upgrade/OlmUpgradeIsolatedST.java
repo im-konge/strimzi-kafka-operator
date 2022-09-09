@@ -78,7 +78,7 @@ public class OlmUpgradeIsolatedST extends AbstractUpgradeST {
         procedures.put("interBrokerProtocolVersion", testKafkaVersion.protocolVersion());
         latestUpgradeData.put("proceduresAfterOperatorUpgrade", procedures);
         // This is needed to overwrite for 2.2.0 OLM
-        latestUpgradeData.put("fromVersion", "2.1.0-5");
+        latestUpgradeData.put("fromVersion", "2.1.0-8");
         latestUpgradeData.put("toVersion", Environment.OLM_OPERATOR_LATEST_RELEASE_VERSION);
         latestUpgradeData.put("toExamples", "HEAD");
         latestUpgradeData.put("urlTo", "HEAD");
