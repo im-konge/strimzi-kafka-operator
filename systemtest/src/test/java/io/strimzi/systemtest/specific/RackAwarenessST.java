@@ -31,11 +31,14 @@ import io.strimzi.systemtest.utils.StUtils;
 import io.strimzi.systemtest.utils.kafkaUtils.KafkaConnectUtils;
 import io.strimzi.systemtest.utils.kubeUtils.objects.PodUtils;
 import static io.strimzi.test.k8s.KubeClusterResource.cmdKubeClient;
+
+import io.strimzi.test.k8s.KubeClusterResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,14 +89,14 @@ class RackAwarenessST extends AbstractST {
 
         // check Kafka rack awareness configuration
         String podNodeName = pod.getSpec().getNodeName();
-        String hostname = podNodeName.contains(".") ? podNodeName.substring(0, podNodeName.indexOf(".")) : podNodeName;
+        String hostname =  KubeClusterResource.getInstance().isOpenShift() ? podNodeName : podNodeName.substring(0, podNodeName.indexOf("."));
 
         String rackIdOut = cmdKubeClient(storage.getNamespaceName()).execInPod(KafkaResources.kafkaPodName(storage.getClusterName(), 0),
                 "/bin/bash", "-c", "cat /opt/kafka/init/rack.id").out().trim();
         String brokerRackOut = cmdKubeClient(storage.getNamespaceName()).execInPod(KafkaResources.kafkaPodName(storage.getClusterName(), 0),
                 "/bin/bash", "-c", "cat /tmp/strimzi.properties | grep broker.rack").out().trim();
-        assertThat(rackIdOut.trim(), is(hostname));
-        assertThat(brokerRackOut.contains("broker.rack=" + hostname), is(true));
+        assertTrue(rackIdOut.trim().equals(hostname));
+        assertTrue(brokerRackOut.equals("broker.rack=" + hostname));
     }
 
     @Tag(CONNECT)
@@ -136,10 +139,10 @@ class RackAwarenessST extends AbstractST {
 
         // check Kafka client rack awareness configuration
         String podNodeName = pod.getSpec().getNodeName();
-        String hostname = podNodeName.contains(".") ? podNodeName.substring(0, podNodeName.indexOf(".")) : podNodeName;
+        String hostname = KubeClusterResource.getInstance().isOpenShift() ? podNodeName : podNodeName.substring(0, podNodeName.indexOf("."));
         String commandOut = cmdKubeClient(storage.getNamespaceName()).execInPod(podName,
                 "/bin/bash", "-c", "cat /tmp/strimzi-connect.properties | grep consumer.client.rack").out().trim();
-        assertThat(commandOut.equals("consumer.client.rack=" + hostname), is(true));
+        assertTrue(commandOut.equals("consumer.client.rack=" + hostname));
     }
 
     @Tag(MIRROR_MAKER2)
@@ -179,9 +182,9 @@ class RackAwarenessST extends AbstractST {
 
         // check Kafka client rack awareness configuration
         String podNodeName = pod.getSpec().getNodeName();
-        String hostname = podNodeName.contains(".") ? podNodeName.substring(0, podNodeName.indexOf(".")) : podNodeName;
+        String hostname = KubeClusterResource.getInstance().isOpenShift() ? podNodeName : podNodeName.substring(0, podNodeName.indexOf("."));
         String commandOut = cmdKubeClient(storage.getNamespaceName()).execInPod(podName, "/bin/bash", "-c", "cat /tmp/strimzi-connect.properties | grep consumer.client.rack").out().trim();
-        assertThat(commandOut.equals("consumer.client.rack=" + hostname), is(true));
+        assertTrue(commandOut.equals("consumer.client.rack=" + hostname));
     }
 
     @BeforeEach
