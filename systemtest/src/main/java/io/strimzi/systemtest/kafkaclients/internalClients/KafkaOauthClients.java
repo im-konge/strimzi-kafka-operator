@@ -12,7 +12,10 @@ import io.sundr.builder.annotations.Buildable;
 
 import java.security.InvalidParameterException;
 
-@Buildable(editableEnabled = false)
+@Buildable(
+    builderPackage = "io.fabric8.kubernetes.api.builder",
+    editableEnabled = false
+)
 public class KafkaOauthClients extends KafkaClients {
     private String oauthClientId;
     private String oauthProducerClientId;

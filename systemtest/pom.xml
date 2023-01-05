@@ -220,19 +220,46 @@
         </dependency>
         <!-- These are needed for builders and fluents, in api we are using fabric8 imports instead of sundrio's. -->
         <dependency>
-            <groupId>io.sundr</groupId>
-            <artifactId>sundr-core</artifactId>
-            <version>${sundrio.version}</version>
-            <scope>provided</scope>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-model-coordination</artifactId>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-model-coordination</artifactId>
+            <artifactId>kubernetes-model-common</artifactId>
+            <version>6.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.1.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>java-generator-maven-plugin</artifactId>
+                <version>6.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <source>src/main/resources/kubernetes</source>
+                    <extraAnnotations>true</extraAnnotations>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -258,6 +285,11 @@
                 <version>${maven.javadoc.version}</version>
                 <configuration>
                     <doclint>none</doclint>
+                    <sourceFileExcludes>
+                        <exclude>**/org/keycloak/**/*.java</exclude>
+                        <exclude>**/systemtest/templates/keycloak/**/*.java</exclude>
+                        <exclude>**/systemtest/keycloak/**/*.java</exclude>
+                    </sourceFileExcludes>
                 </configuration>
             </plugin>
         </plugins>

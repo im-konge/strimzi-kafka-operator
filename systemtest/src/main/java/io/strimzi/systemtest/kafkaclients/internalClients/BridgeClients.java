@@ -17,7 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Buildable(editableEnabled = false)
+@Buildable(
+    builderPackage = "io.fabric8.kubernetes.api.builder",
+    editableEnabled = false
+)
 public class BridgeClients extends KafkaClients {
     private int port;
     private int pollInterval;

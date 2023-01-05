@@ -8,7 +8,10 @@ import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.strimzi.systemtest.tracing.TracingConstants;
 import io.sundr.builder.annotations.Buildable;
 
-@Buildable(editableEnabled = false)
+@Buildable(
+    builderPackage = "io.fabric8.kubernetes.api.builder",
+    editableEnabled = false
+)
 public class BridgeTracingClients extends BridgeClients {
 
     private String tracingServiceNameEnvVar;

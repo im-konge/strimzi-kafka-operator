@@ -29,7 +29,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Buildable(editableEnabled = false)
+@Buildable(
+    builderPackage = "io.fabric8.kubernetes.api.builder",
+    editableEnabled = false
+)
 public class KafkaClients extends BaseClients {
     private static final Logger LOGGER = LogManager.getLogger(KafkaClients.class);
 

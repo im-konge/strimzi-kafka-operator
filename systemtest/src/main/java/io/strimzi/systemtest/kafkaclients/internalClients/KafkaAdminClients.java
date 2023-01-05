@@ -23,7 +23,10 @@ import java.util.Map;
 
 import static io.strimzi.systemtest.resources.ResourceManager.kubeClient;
 
-@Buildable(editableEnabled = false)
+@Buildable(
+    builderPackage = "io.fabric8.kubernetes.api.builder",
+    editableEnabled = false
+)
 public class KafkaAdminClients extends BaseClients {
     private int partitions;
     private int replicationFactor;
