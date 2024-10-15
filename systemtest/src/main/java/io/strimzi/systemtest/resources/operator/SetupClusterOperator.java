@@ -372,8 +372,8 @@ public class SetupClusterOperator {
         OlmUtils.waitForNonApprovedInstallPlanWithCsvNameOrPrefix(namespaceInstallTo, olmConfiguration.getOlmAppBundlePrefix());
         String newDeploymentName = OlmUtils.approveNonApprovedInstallPlanAndReturnDeploymentName(namespaceInstallTo, olmConfiguration.getOlmAppBundlePrefix());
 
+        DeploymentUtils.waitForCreationOfDeploymentWithPrefix(namespaceInstallTo, newDeploymentName);
         olmConfiguration.setOlmOperatorDeploymentName(kubeClient().getDeploymentNameByPrefix(olmConfiguration.getNamespaceName(), newDeploymentName));
-        DeploymentUtils.waitForCreationOfDeploymentWithPrefix(namespaceInstallTo, olmConfiguration.getOlmOperatorDeploymentName());
 
         DeploymentUtils.waitForDeploymentAndPodsReady(namespaceInstallTo, olmConfiguration.getOlmOperatorDeploymentName(), 1);
     }
