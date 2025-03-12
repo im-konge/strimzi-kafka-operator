@@ -2,7 +2,7 @@
  * Copyright Strimzi authors.
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
-package io.strimzi.systemtest.resources.types;
+package io.strimzi.systemtest.resources.types.customresource;
 
 import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
@@ -18,7 +18,6 @@ import io.strimzi.api.kafka.model.kafka.KafkaStatus;
 import io.strimzi.operator.common.Annotations;
 import io.strimzi.operator.common.model.Labels;
 import io.strimzi.systemtest.resources.crd.KafkaTopicResource;
-import io.strimzi.systemtest.utils.kafkaUtils.KafkaUtils;
 import io.strimzi.systemtest.utils.kubeUtils.objects.PersistentVolumeClaimUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,12 +54,12 @@ public class KafkaType implements ResourceType<Kafka> {
 
     @Override
     public void create(Kafka kafka) {
-        client.resource(kafka).create();
+        client.inNamespace(kafka.getMetadata().getNamespace()).resource(kafka).create();
     }
 
     @Override
     public void update(Kafka kafka) {
-        client.resource(kafka).update();
+        client.inNamespace(kafka.getMetadata().getNamespace()).resource(kafka).update();
     }
 
     @Override
@@ -85,7 +84,7 @@ public class KafkaType implements ResourceType<Kafka> {
         }
 
         // get current Kafka
-        Kafka currentKafka = kafkaClient().inNamespace(namespaceName)
+        Kafka currentKafka = client.inNamespace(namespaceName)
             .withName(kafka.getMetadata().getName()).get();
 
         // proceed only if kafka is still present as Kafka is purposefully deleted in some test cases
@@ -93,7 +92,7 @@ public class KafkaType implements ResourceType<Kafka> {
             // load current Kafka's annotations to obtain information, if KafkaNodePools are used for this Kafka
             Map<String, String> annotations = currentKafka.getMetadata().getAnnotations();
 
-            kafkaClient().inNamespace(namespaceName).withName(
+            client.inNamespace(namespaceName).withName(
                 kafka.getMetadata().getName()).withPropagationPolicy(DeletionPropagation.FOREGROUND).delete();
 
             if (annotations.get(Annotations.ANNO_STRIMZI_IO_NODE_POOLS) == null
@@ -113,8 +112,8 @@ public class KafkaType implements ResourceType<Kafka> {
 
     @Override
     public boolean isReady(Kafka kafka) {
-        KafkaStatus kafkaAccessStatus = client.resource(kafka).get().getStatus();
-        Optional<Condition> readyCondition = kafkaAccessStatus.getConditions().stream().filter(condition -> condition.getType().equals("Ready")).findFirst();
+        KafkaStatus kafkaStatus = client.inNamespace(kafka.getMetadata().getNamespace()).resource(kafka).get().getStatus();
+        Optional<Condition> readyCondition = kafkaStatus.getConditions().stream().filter(condition -> condition.getType().equals("Ready")).findFirst();
 
         return readyCondition.map(condition -> condition.getStatus().equals("True")).orElse(false);
     }

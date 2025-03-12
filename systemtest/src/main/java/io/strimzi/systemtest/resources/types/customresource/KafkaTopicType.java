@@ -2,7 +2,7 @@
  * Copyright Strimzi authors.
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
-package io.strimzi.systemtest.resources.types;
+package io.strimzi.systemtest.resources.types.customresource;
 
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -37,17 +37,17 @@ public class KafkaTopicType implements ResourceType<KafkaTopic> {
 
     @Override
     public void create(KafkaTopic kafkaTopic) {
-        client.resource(kafkaTopic).create();
+        client.inNamespace(kafkaTopic.getMetadata().getNamespace()).resource(kafkaTopic).create();
     }
 
     @Override
     public void update(KafkaTopic kafkaTopic) {
-        client.resource(kafkaTopic).update();
+        client.inNamespace(kafkaTopic.getMetadata().getNamespace()).resource(kafkaTopic).update();
     }
 
     @Override
     public void delete(KafkaTopic kafkaTopic) {
-        client.resource(kafkaTopic).delete();
+        client.inNamespace(kafkaTopic.getMetadata().getNamespace()).resource(kafkaTopic).delete();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class KafkaTopicType implements ResourceType<KafkaTopic> {
 
     @Override
     public boolean isReady(KafkaTopic kafkaTopic) {
-        KafkaTopicStatus kafkaTopicStatus = client.resource(kafkaTopic).get().getStatus();
+        KafkaTopicStatus kafkaTopicStatus = client.inNamespace(kafkaTopic.getMetadata().getNamespace()).resource(kafkaTopic).get().getStatus();
         Optional<Condition> readyCondition = kafkaTopicStatus.getConditions().stream().filter(condition -> condition.getType().equals("Ready")).findFirst();
 
         return readyCondition.map(condition -> condition.getStatus().equals("True")).orElse(false);
