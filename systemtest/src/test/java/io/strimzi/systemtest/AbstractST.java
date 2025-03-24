@@ -19,9 +19,17 @@ import io.strimzi.systemtest.parallel.TestSuiteNamespaceManager;
 import io.strimzi.systemtest.resources.NamespaceManager;
 import io.strimzi.systemtest.resources.ResourceManager;
 import io.strimzi.systemtest.resources.operator.SetupClusterOperator;
+import io.strimzi.systemtest.resources.types.customresource.KafkaAccessType;
+import io.strimzi.systemtest.resources.types.customresource.KafkaBridgeType;
+import io.strimzi.systemtest.resources.types.customresource.KafkaConnectType;
+import io.strimzi.systemtest.resources.types.customresource.KafkaConnectorType;
+import io.strimzi.systemtest.resources.types.customresource.KafkaMirrorMaker2Type;
 import io.strimzi.systemtest.resources.types.customresource.KafkaNodePoolType;
+import io.strimzi.systemtest.resources.types.customresource.KafkaRebalanceType;
 import io.strimzi.systemtest.resources.types.customresource.KafkaTopicType;
 import io.strimzi.systemtest.resources.types.customresource.KafkaType;
+import io.strimzi.systemtest.resources.types.customresource.KafkaUserType;
+import io.strimzi.systemtest.resources.types.customresource.StrimziPodSetType;
 import io.strimzi.systemtest.utils.StUtils;
 import io.strimzi.test.interfaces.TestSeparator;
 import io.strimzi.test.k8s.KubeClusterResource;
@@ -57,9 +65,17 @@ public abstract class AbstractST implements TestSeparator {
             new DeploymentType(),
             new NamespaceType(),
             new JobType(),
-            new KafkaType(),
+            new KafkaAccessType(),
+            new KafkaBridgeType(),
+            new KafkaConnectorType(),
+            new KafkaConnectType(),
+            new KafkaMirrorMaker2Type(),
+            new KafkaNodePoolType(),
+            new KafkaRebalanceType(),
             new KafkaTopicType(),
-            new KafkaNodePoolType()
+            new KafkaType(),
+            new KafkaUserType(),
+            new StrimziPodSetType()
         );
     }
 
