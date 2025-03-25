@@ -187,6 +187,10 @@ public class ClusterOperatorConfiguration {
         return operatorVersion;
     }
 
+    public void setOperatorVersion(String operatorVersion) {
+        this.operatorVersion = operatorVersion;
+    }
+
     public OlmInstallationStrategy getOlmInstallationStrategy() {
         return olmInstallationStrategy;
     }

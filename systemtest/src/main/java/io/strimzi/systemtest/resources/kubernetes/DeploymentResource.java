@@ -14,7 +14,6 @@ import io.strimzi.test.ReadWriteUtils;
 
 import java.util.function.Consumer;
 
-
 public class DeploymentResource implements ResourceType<Deployment> {
 
     @Override
