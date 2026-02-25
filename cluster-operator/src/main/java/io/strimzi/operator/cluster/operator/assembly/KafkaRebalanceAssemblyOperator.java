@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -31,6 +30,8 @@ import io.strimzi.api.kafka.model.rebalance.KafkaRebalanceState;
 import io.strimzi.api.kafka.model.rebalance.KafkaRebalanceStatus;
 import io.strimzi.api.kafka.model.rebalance.KafkaRebalanceStatusBuilder;
 import io.strimzi.operator.cluster.ClusterOperatorConfig;
+import io.strimzi.operator.cluster.model.AbstractModel;
+import io.strimzi.operator.cluster.model.ConfigMapUtils;
 import io.strimzi.operator.cluster.model.CruiseControl;
 import io.strimzi.operator.cluster.model.ModelUtils;
 import io.strimzi.operator.cluster.model.NoSuchResourceException;
@@ -715,15 +716,13 @@ public class KafkaRebalanceAssemblyOperator
         JsonNode beforeAndAfterBrokerLoad = parseLoadStats(
                 brokerLoadBeforeOptimization, brokerLoadAfterOptimization);
 
-        ConfigMap rebalanceMap = new ConfigMapBuilder()
-                .withNewMetadata()
-                    .withNamespace(kafkaRebalance.getMetadata().getNamespace())
-                    .withName(kafkaRebalance.getMetadata().getName())
-                    .withLabels(Collections.singletonMap("app", "strimzi"))
-                    .withOwnerReferences(ModelUtils.createOwnerReference(kafkaRebalance, false))
-                .endMetadata()
-                .withData(Collections.singletonMap(BROKER_LOAD_KEY, beforeAndAfterBrokerLoad.toPrettyString()))
-                .build();
+        ConfigMap rebalanceMap = ConfigMapUtils.createConfigMap(
+            kafkaRebalance.getMetadata().getName(),
+            kafkaRebalance.getMetadata().getNamespace(),
+            Labels.generateDefaultLabels(kafkaRebalance, Labels.APPLICATION_NAME, "rebalance-proposal", AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME),
+            ModelUtils.createOwnerReference(kafkaRebalance, false),
+            Collections.singletonMap(BROKER_LOAD_KEY, beforeAndAfterBrokerLoad.toPrettyString())
+        );
 
         Map<String, Object> summaryMap = OBJECT_MAPPER.convertValue(proposalJson.get(CruiseControlRebalanceKeys.SUMMARY.getKey()), new TypeReference<Map<String, Object>>() { });
         summaryMap.put("afterBeforeLoadConfigMap", rebalanceMap.getMetadata().getName());
