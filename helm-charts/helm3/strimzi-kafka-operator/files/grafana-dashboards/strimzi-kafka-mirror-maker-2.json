@@ -4,7 +4,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "7.4.5"
+      "version": "9.0.0"
     },
     {
       "type": "panel",
@@ -20,6 +20,11 @@
       "type": "panel",
       "id": "timeseries",
       "name": "Timeseries"
+    },
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge"
     }
   ],
   "annotations": {
@@ -45,7 +50,10 @@
   "panels": [
     {
       "collapsed": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -56,7 +64,10 @@
       "panels": [],
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "refId": "A"
         }
       ],
@@ -64,7 +75,10 @@
       "type": "row"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -122,10 +136,13 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_worker_connector_count{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"})",
           "format": "time_series",
           "intervalFactor": 2,
@@ -137,7 +154,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -195,10 +215,13 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_record_rate{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"})",
           "format": "time_series",
           "intervalFactor": 2,
@@ -210,7 +233,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "Time duration between record timestamp in the source topic and the time when the source connector handles the record (aka. MM2 consumer lag time).",
       "fieldConfig": {
         "defaults": {
@@ -375,10 +401,13 @@
           }
         ]
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_record_age_ms{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -388,7 +417,10 @@
           "refId": "A"
         },
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_record_age_ms_avg{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -399,7 +431,10 @@
           "refId": "B"
         },
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_record_age_ms_min{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -410,7 +445,10 @@
           "refId": "C"
         },
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_record_age_ms_max{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -465,7 +503,10 @@
       "type": "table"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -524,10 +565,13 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_worker_task_count{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"})",
           "format": "time_series",
           "interval": "",
@@ -541,7 +585,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -599,10 +646,13 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_byte_rate{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"})",
           "format": "time_series",
@@ -617,7 +667,10 @@
       "type": "stat"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "Consumer lag which in the context of the replication indicates whether the consumer in the source connector can keep up with the rate records are produced in the source.",
       "fieldConfig": {
         "defaults": {
@@ -683,15 +736,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_consumer_fetch_manager_records_lag{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\",clientid=~\".*replication-consumer\\\"\"}) by (topic, partition)",
           "interval": "",
@@ -703,7 +756,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "Consumer lag which in the context of the replication indicates whether the consumer in the source connector can keep up with the rate records are produced in the source.",
       "fieldConfig": {
         "defaults": {
@@ -752,10 +808,13 @@
         "frameIndex": 1,
         "showHeader": true
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "topk(20, sum(kafka_consumer_fetch_manager_records_lag{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\",clientid=~\".*replication-consumer\\\"\"}) by (partition, topic))",
           "format": "table",
@@ -788,7 +847,10 @@
       "type": "table"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -857,15 +919,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(rate(kafka_consumer_incoming_byte_total{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}[5m])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
@@ -881,7 +943,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -950,15 +1015,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(rate(kafka_producer_outgoing_byte_total{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}[5m])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
@@ -973,7 +1038,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "The end to end latency from the record timestamp in the source topic to the time when the record is written successfully to the target cluster.",
       "fieldConfig": {
         "defaults": {
@@ -1141,10 +1209,13 @@
           }
         ]
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_replication_latency_ms{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -1154,7 +1225,10 @@
           "refId": "A"
         },
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_replication_latency_ms_avg{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -1165,7 +1239,10 @@
           "refId": "B"
         },
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_replication_latency_ms_min{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -1176,7 +1253,10 @@
           "refId": "C"
         },
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(kafka_connect_mirror_mirrorsourceconnector_replication_latency_ms_max{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (partition, topic)",
           "format": "table",
@@ -1231,7 +1311,10 @@
       "type": "table"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "The latency for synchronizing the consumer groups of the source cluster to the target cluster.",
       "fieldConfig": {
         "defaults": {
@@ -1301,7 +1384,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
           "exemplar": false,
@@ -1349,7 +1432,10 @@
       "type": "table"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1416,15 +1502,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_producer_buffer_available_bytes{clientid=~\"\\\".*SourceConnector-[0-9]+\\\"\"})",
           "interval": "",
           "legendFormat": "{{clientid}}",
@@ -1435,7 +1521,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "Time duration that this task takes to commit its offsets to the target.",
       "fieldConfig": {
         "defaults": {
@@ -1503,15 +1592,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_connector_task_offset_commit_avg_time_ms{connector=~\"\\\".*SourceConnector\\\"\", task=~\"[0-9]+\"})/count(kafka_connect_connector_task_offset_commit_avg_time_ms{connector=~\"\\\".*SourceConnector\\\"\", task=~\"[0-9]+\"})",
           "interval": "",
           "legendFormat": "",
@@ -1522,7 +1611,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "The number of records that this task has consumed from the source but not yet produced to the target.",
       "fieldConfig": {
         "defaults": {
@@ -1616,15 +1708,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_source_task_source_record_active_count{connector=~\"\\\".*SourceConnector\\\"\"})",
           "interval": "",
           "legendFormat": "",
@@ -1636,7 +1728,10 @@
     },
     {
       "collapsed": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1647,7 +1742,10 @@
       "panels": [],
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "refId": "A"
         }
       ],
@@ -1655,7 +1753,10 @@
       "type": "row"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -1702,10 +1803,13 @@
         "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_coordinator_assigned_connectors{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (kubernetes_pod_name)",
           "format": "time_series",
           "instant": false,
@@ -1718,7 +1822,10 @@
       "type": "bargauge"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1786,15 +1893,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_worker_rebalance_rebalancing{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"})",
           "interval": "",
           "legendFormat": "",
@@ -1805,7 +1912,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -1852,10 +1962,13 @@
         "text": {},
         "valueMode": "color"
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(kafka_connect_coordinator_assigned_tasks{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (kubernetes_pod_name)",
           "interval": "",
           "legendFormat": "{{kubernetes_pod_name}}",
@@ -1867,7 +1980,10 @@
     },
     {
       "collapsed": false,
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1878,7 +1994,10 @@
       "panels": [],
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "refId": "A"
         }
       ],
@@ -1886,7 +2005,10 @@
       "type": "row"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1953,15 +2075,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$kubernetes_namespace\",pod=~\"$strimzi_mirror_maker_cluster_name-mirrormaker2-.+\",container=\"$strimzi_mirror_maker_cluster_name-mirrormaker2\"}[5m])) by (pod)",
           "format": "time_series",
@@ -1977,7 +2099,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2044,15 +2169,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(jvm_memory_used_bytes{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
@@ -2067,7 +2192,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2136,15 +2264,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(rate(jvm_gc_collection_seconds_sum{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}[5m])) by (kubernetes_pod_name)",
           "format": "time_series",
           "hide": false,
@@ -2160,7 +2288,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "${DS_PROMETHEUS}",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2228,15 +2359,15 @@
         "tooltip": {
           "mode": "multi",
           "sort": "none"
-        },
-        "tooltipOptions": {
-          "mode": "single"
         }
       },
-      "pluginVersion": "7.4.5",
+      "pluginVersion": "9.0.0",
       "targets": [
         {
-          "datasource": "${DS_PROMETHEUS}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "expr": "sum(jvm_threads_current{strimzi_io_kind=~\"KafkaMirrorMaker2\",strimzi_io_cluster=\"$strimzi_mirror_maker_cluster_name\"}) by (kubernetes_pod_name)",
           "instant": false,
           "interval": "",
@@ -2249,8 +2380,7 @@
     }
   ],
   "refresh": false,
-  "schemaVersion": 27,
-  "style": "dark",
+  "schemaVersion": 39,
   "tags": [
     "Strimzi",
     "Kafka",
@@ -2264,8 +2394,6 @@
           "text": "Prometheus",
           "value": "Prometheus"
         },
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "datasource",
@@ -2279,16 +2407,16 @@
         "type": "datasource"
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
           "text": "default",
           "value": "default"
         },
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Namespace",
@@ -2303,23 +2431,19 @@
         "regex": "/.*namespace=\"([^\"]*).*/",
         "skipUrlSync": false,
         "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "query"
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
           "text": "my-mirror-maker-2",
           "value": "my-mirror-maker-2"
         },
-        "datasource": "${DS_PROMETHEUS}",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
         "definition": "",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Cluster Name",
@@ -2334,10 +2458,7 @@
         "regex": "/.*strimzi_io_cluster=\"([^\"]*).*/",
         "skipUrlSync": false,
         "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "query"
       }
     ]
   },
