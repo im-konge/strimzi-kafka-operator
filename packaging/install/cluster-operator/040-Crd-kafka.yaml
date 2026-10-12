@@ -2051,6 +2051,19 @@ spec:
                     required:
                     - type
                     description: "Quotas plugin configuration for Kafka brokers allows setting quotas for disk usage, produce/fetch rates, and more. Supported plugin types include `kafka` (default) and `strimzi`. If not specified, the default `kafka` quotas plugin is used."
+                  features:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the Kafka feature that should be updated to certain version.
+                        version:
+                          type: integer
+                          minimum: 0
+                          description: Version of the Kafka feature to which the operator should update certain Kafka feature.
+                    description: List of Kafka features that should be configured on Kafka side.
                 required:
                 - listeners
                 description: Configuration of the Kafka cluster.
@@ -5870,6 +5883,19 @@ spec:
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
                 description: The current security configuration of the Kafka cluster.
+              kafkaFeatures:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the Kafka feature that should be updated to certain version.
+                    version:
+                      type: integer
+                      minimum: 0
+                      description: Version of the Kafka feature to which the operator should update certain Kafka feature.
+                description: The status of Kafka features.
             description: The status of the Kafka cluster.
         required:
         - spec

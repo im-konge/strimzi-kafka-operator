@@ -65,6 +65,7 @@ import io.strimzi.api.kafka.model.kafka.KafkaSpec;
 import io.strimzi.api.kafka.model.kafka.Storage;
 import io.strimzi.api.kafka.model.kafka.cruisecontrol.CruiseControlResources;
 import io.strimzi.api.kafka.model.kafka.exporter.KafkaExporterResources;
+import io.strimzi.api.kafka.model.kafka.features.KafkaFeature;
 import io.strimzi.api.kafka.model.kafka.listener.GenericKafkaListener;
 import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerAuthenticationTls;
 import io.strimzi.api.kafka.model.kafka.listener.KafkaListenerType;
@@ -211,6 +212,7 @@ public class KafkaCluster extends AbstractModel implements SupportsMetrics, Supp
     private KafkaAuthorization authorization;
     private KafkaVersion kafkaVersion;
     private String metadataVersion;
+    private List<KafkaFeature> kafkaFeatures;
     private String clusterId;
     private JmxModel jmx;
     private CruiseControlMetricsReporter ccMetricsReporter;
@@ -305,6 +307,10 @@ public class KafkaCluster extends AbstractModel implements SupportsMetrics, Supp
         // Validates and sets the metadata version used in KRaft
         validateMetadataVersion(versionChange.metadataVersion());
         result.metadataVersion = versionChange.metadataVersion();
+
+        // Validates and sets desired Kafka features
+        validateKafkaFeatures(kafkaClusterSpec.getFeatures());
+        result.kafkaFeatures = kafkaClusterSpec.getFeatures();
 
         // Number of broker nodes => used later in various validation methods
         long numberOfBrokers = result.brokerNodes().size();
@@ -535,6 +541,38 @@ public class KafkaCluster extends AbstractModel implements SupportsMetrics, Supp
             }
         } catch (IllegalArgumentException e)    {
             throw new InvalidResourceException("Metadata version " + metadataVersion + " is invalid", e);
+        }
+    }
+
+    /**
+     * Validates Kafka features specified by user.
+     */
+    /* test */ static void validateKafkaFeatures(List<KafkaFeature> kafkaFeatures) {
+        if (kafkaFeatures == null || kafkaFeatures.isEmpty()) {
+            return;
+        }
+
+        List<String> errors = new ArrayList<>();
+        Set<String> seenFeatures = new HashSet<>();
+
+        kafkaFeatures.forEach(kafkaFeature -> {
+            // in case that we cannot add it to the set, there is already same feature present, thus we have duplicate
+            if (!seenFeatures.add(kafkaFeature.getName())) {
+                errors.add("Duplicate feature: " + kafkaFeature.getName());
+            }
+        });
+
+        if (errors.isEmpty()) {
+            // now check for forbidden features
+            KafkaClusterSpec.FORBIDDEN_KAFKA_FEATURES.forEach(forbidden -> {
+                if (seenFeatures.contains(forbidden)) {
+                    errors.add(forbidden + " cannot be configured as it is a forbidden feature.");
+                }
+            });
+        }
+
+        if (!errors.isEmpty()) {
+            throw new InvalidResourceException("Invalid Kafka features configuration: " + String.join("; ", errors));
         }
     }
 
@@ -1982,6 +2020,15 @@ public class KafkaCluster extends AbstractModel implements SupportsMetrics, Supp
      */
     public String getMetadataVersion() {
         return metadataVersion;
+    }
+
+    /**
+     * Gets the Kafka features for this cluster.
+     *
+     * @return List of desired Kafka features.
+     */
+    public List<KafkaFeature> getKafkaFeatures() {
+        return kafkaFeatures;
     }
 
     /**

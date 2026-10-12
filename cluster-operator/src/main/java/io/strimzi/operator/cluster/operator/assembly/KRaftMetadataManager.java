@@ -13,11 +13,8 @@ import io.strimzi.operator.common.ReconciliationLogger;
 import io.strimzi.operator.common.auth.Identity;
 import io.strimzi.operator.common.model.StatusUtils;
 import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.admin.FeatureUpdate;
-import org.apache.kafka.clients.admin.UpdateFeaturesOptions;
 import org.apache.kafka.server.common.MetadataVersion;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -86,7 +83,7 @@ public class KRaftMetadataManager {
     )    {
         short desiredMetadataLevel = MetadataVersion.fromVersionString(desiredMetadataVersion, false).featureLevel();
 
-        return currentVersion(reconciliation, kafkaAdmin)
+        return currentVersion(kafkaAdmin)
                 .thenCompose(currentMetadataLevel -> {
                     if (currentMetadataLevel.equals(desiredMetadataLevel))  {
                         // No metadata version change as the current and desired versions are equal
@@ -97,7 +94,7 @@ public class KRaftMetadataManager {
                         status.setKafkaMetadataVersion(MetadataVersion.fromFeatureLevel(currentMetadataLevel).toString());
                         return CompletableFuture.completedFuture(null);
                     } else {
-                        return updateVersion(reconciliation, kafkaAdmin, currentMetadataLevel, desiredMetadataLevel)
+                        return KafkaFeaturesManager.updateVersion(reconciliation, kafkaAdmin, "metadata.version", currentMetadataLevel, desiredMetadataLevel)
                                 .thenCompose(voidResult -> {
                                     // We convert the metadata level to the version for the use in the status instead of using the
                                     // desired version directly in order to get the full version including the subversion
@@ -109,7 +106,7 @@ public class KRaftMetadataManager {
                                 .exceptionallyCompose(error -> {
                                     // We failed to update the metadata version, but we do not want to break the
                                     // reconciliation. We log the error and update the metadata version status.
-                                    return currentVersion(reconciliation, kafkaAdmin)
+                                    return currentVersion(kafkaAdmin)
                                             .thenCompose(currentMetadataLevelAfterFailure -> {
                                                 String metadataVersion = MetadataVersion.fromFeatureLevel(currentMetadataLevelAfterFailure).toString();
                                                 LOGGER.warnCr(reconciliation, "Failed to update metadata version to {} (the current version is {})", desiredMetadataVersion, metadataVersion, error);
@@ -122,10 +119,7 @@ public class KRaftMetadataManager {
                 });
     }
 
-    private static CompletionStage<Short> currentVersion(
-            Reconciliation reconciliation,
-            Admin kafkaAdmin
-    )  {
+    private static CompletionStage<Short> currentVersion(Admin kafkaAdmin)  {
         return kafkaAdmin.describeFeatures().featureMetadata().toCompletionStage()
                 .thenCompose(featureMetadata -> {
                     if (featureMetadata.finalizedFeatures().get(METADATA_VERSION_KEY) != null)  {
@@ -134,20 +128,5 @@ public class KRaftMetadataManager {
                         return CompletableFuture.failedFuture(new RuntimeException("Failed to describe " + METADATA_VERSION_KEY + " feature"));
                     }
                 });
-    }
-
-    private static CompletionStage<Void> updateVersion(
-            Reconciliation reconciliation,
-            Admin kafkaAdmin,
-            short currentMetadataLevel,
-            short desiredMetadataLevel
-    )  {
-        UpdateFeaturesOptions options = new UpdateFeaturesOptions().validateOnly(false);
-        FeatureUpdate.UpgradeType upgradeType = desiredMetadataLevel > currentMetadataLevel ? FeatureUpdate.UpgradeType.UPGRADE : FeatureUpdate.UpgradeType.SAFE_DOWNGRADE;
-        FeatureUpdate featureUpdate = new FeatureUpdate(desiredMetadataLevel, upgradeType);
-
-        LOGGER.infoCr(reconciliation, "Updating metadata version from {} to {}", MetadataVersion.fromFeatureLevel(currentMetadataLevel), MetadataVersion.fromFeatureLevel(desiredMetadataLevel));
-
-        return kafkaAdmin.updateFeatures(Map.of(METADATA_VERSION_KEY, featureUpdate), options).values().get(METADATA_VERSION_KEY).toCompletionStage();
     }
 }

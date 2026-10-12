@@ -117,6 +117,9 @@ include::../api/io.strimzi.api.kafka.model.kafka.KafkaClusterSpec.adoc[leveloffs
 |quotas
 |xref:type-QuotasPluginKafka-{context}[`QuotasPluginKafka`], xref:type-QuotasPluginStrimzi-{context}[`QuotasPluginStrimzi`]
 |Quotas plugin configuration for Kafka brokers allows setting quotas for disk usage, produce/fetch rates, and more. Supported plugin types include `kafka` (default) and `strimzi`. If not specified, the default `kafka` quotas plugin is used.
+|features
+|xref:type-KafkaFeature-{context}[`KafkaFeature`] array
+|List of Kafka features that should be configured on Kafka side.
 |====
 
 [id='type-GenericKafkaListener-{context}']
@@ -1256,6 +1259,23 @@ It must have the value `strimzi` for the type `QuotasPluginStrimzi`.
 |List of principals that are excluded from the quota. The principals have to be prefixed with `User:`, for example `User:my-user;User:CN=my-other-user`.
 |====
 
+[id='type-KafkaFeature-{context}']
+= `KafkaFeature` schema reference
+
+Used in: xref:type-KafkaClusterSpec-{context}[`KafkaClusterSpec`], xref:type-KafkaStatus-{context}[`KafkaStatus`]
+
+
+[cols="2,2,3a",options="header"]
+|====
+|Property |Property type |Description
+|name
+|string
+|Name of the Kafka feature that should be updated to certain version.
+|version
+|integer
+|Version of the Kafka feature to which the operator should update certain Kafka feature.
+|====
+
 [id='type-EntityOperatorSpec-{context}']
 = `EntityOperatorSpec` schema reference
 
@@ -1827,6 +1847,9 @@ Used in: xref:type-Kafka-{context}[`Kafka`]
 |clusterSecurity
 |object
 |The current security configuration of the Kafka cluster.
+|kafkaFeatures
+|xref:type-KafkaFeature-{context}[`KafkaFeature`] array
+|The status of Kafka features.
 |====
 
 [id='type-Condition-{context}']

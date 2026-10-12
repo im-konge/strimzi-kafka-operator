@@ -281,6 +281,7 @@ public class KafkaReconciler {
                 .compose(i -> defaultKafkaQuotas())
                 .compose(i -> nodeUnregistration())
                 .compose(i -> metadataVersion(kafkaStatus))
+                .compose(i -> kafkaFeatures(kafkaStatus))
                 .compose(i -> deletePersistentClaims())
                 .compose(i -> sharedKafkaConfigurationCleanup())
                 .compose(i -> deleteOldCertificateSecrets())
@@ -1112,6 +1113,10 @@ public class KafkaReconciler {
      */
     protected Future<Void> metadataVersion(KafkaStatus kafkaStatus) {
         return VertxUtil.toFuture(KRaftMetadataManager.maybeUpdateMetadataVersion(reconciliation, this.coIdentity, adminClientProvider, kafka.getMetadataVersion(), kafkaStatus));
+    }
+
+    protected Future<Void> kafkaFeatures(KafkaStatus kafkaStatus) {
+        return VertxUtil.toFuture(KafkaFeaturesManager.maybeUpdateKafkaFeatures(reconciliation, this.coIdentity, adminClientProvider, kafka.getKafkaFeatures(), kafkaStatus));
     }
 
     /**

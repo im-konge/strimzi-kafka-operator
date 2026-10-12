@@ -20,6 +20,7 @@ import io.strimzi.api.kafka.model.common.UnknownPropertyPreserving;
 import io.strimzi.api.kafka.model.common.jmx.HasJmxOptions;
 import io.strimzi.api.kafka.model.common.jmx.KafkaJmxOptions;
 import io.strimzi.api.kafka.model.common.metrics.MetricsConfig;
+import io.strimzi.api.kafka.model.kafka.features.KafkaFeature;
 import io.strimzi.api.kafka.model.kafka.listener.GenericKafkaListener;
 import io.strimzi.api.kafka.model.kafka.quotas.QuotasPlugin;
 import io.strimzi.api.kafka.model.kafka.tieredstorage.TieredStorage;
@@ -34,6 +35,7 @@ import lombok.ToString;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a Kafka "cluster" managed by Strimzi.  
@@ -48,7 +50,7 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"version", "metadataVersion", "image", "listeners", "config", "authorization", "rack",
     "brokerRackInitImage", "livenessProbe", "readinessProbe", "jvmOptions", "jmxOptions", "metricsConfig", "logging",
-    "template", "tieredStorage", "quotas"})
+    "template", "tieredStorage", "quotas", "features"})
 @EqualsAndHashCode
 @ToString
 public class KafkaClusterSpec implements HasConfigurableMetrics, HasConfigurableLogging, HasJmxOptions, HasReadinessProbe, HasLivenessProbe, UnknownPropertyPreserving {
@@ -71,6 +73,8 @@ public class KafkaClusterSpec implements HasConfigurableMetrics, HasConfigurable
             + "broker.session.timeout.ms, broker.heartbeat.interval.ms, controller.socket.timeout.ms, "
             + "controller.quorum.election.backoff.max.ms, controller.quorum.election.timeout.ms, controller.quorum.fetch.timeout.ms"; // KRaft options
 
+    public static final Set<String> FORBIDDEN_KAFKA_FEATURES = Set.of("metadata.version", "kraft.version");
+
     /* When ALLOWED_PER_LISTENER_CONFIGS is updated, documentation/api/io.strimzi.api.kafka.model.kafka.KafkaClusterSpec.adoc must be updated accordingly. */
     public static final String ALLOWED_PER_LISTENER_CONFIGS  = "connections.max.reauth.ms, max.connections, max.connection.creation.rate";
 
@@ -91,6 +95,7 @@ public class KafkaClusterSpec implements HasConfigurableMetrics, HasConfigurable
     private KafkaClusterTemplate template;
     private TieredStorage tieredStorage;
     private QuotasPlugin quotas;
+    private List<KafkaFeature> features;
     private Map<String, Object> additionalProperties;
 
     @Description("The Kafka broker version. Defaults to the latest version. " +
@@ -276,6 +281,16 @@ public class KafkaClusterSpec implements HasConfigurableMetrics, HasConfigurable
 
     public void setQuotas(QuotasPlugin quotas) {
         this.quotas = quotas;
+    }
+
+    @Description("List of Kafka features that should be configured on Kafka side.")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public List<KafkaFeature> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(List<KafkaFeature> features) {
+        this.features = features;
     }
 
     @Override
